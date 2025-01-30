@@ -1,0 +1,6 @@
+work/
+yocto-tales-venv/
+*.pyc
+src/yocto_tales.egg-info/
+build/
+build/

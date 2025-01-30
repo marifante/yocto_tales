@@ -1,0 +1,68 @@
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN \
+        dpkg --add-architecture i386 && \
+        apt-get update && \
+        apt-get install -yq sudo build-essential git nano vim\
+          python3-yaml libncursesw5 libncursesw5:i386 \
+          python python3 man bash diffstat gawk chrpath wget cpio \
+          texinfo lzop apt-utils bc screen libncurses5-dev locales \
+          libc6-dev-i386 doxygen libssl-dev dos2unix xvfb x11-utils \
+          g++-multilib libssl-dev:i386 zlib1g-dev:i386 \
+          libtool libtool-bin procps python3-distutils pigz socat \
+          zstd iproute2 lz4 iputils-ping \
+          curl libtinfo5 net-tools xterm rsync u-boot-tools unzip zip && \
+        rm -rf /var/lib/apt-lists/* && \
+        echo "dash dash/sh boolean false" | debconf-set-selections && \
+        dpkg-reconfigure dash
+
+# Install TFTP related packages (don't know really why we need to install them in separate lines)
+RUN apt-get -y update && \
+    apt-get install -y tftpd-hpa && \
+    apt-get install -y tftp-hpa && \
+    apt-get install -y tftpd
+
+RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /bin/repo && chmod a+x /bin/repo
+
+# Set folder for tftp server and configure xinetd to run it
+RUN mkdir -p /home/embeddev/tftpboot && chmod 666 /home/embeddev/tftpboot \
+  && sed -i 's/TFTP\_USERNAME\=\"tftp\"/TFTP\_USERNAME\=\"petalinux\"/g' /etc/default/tftpd-hpa \
+  && sed -i 's/TFTP\_DIRECTORY\=\"\/tftpboot\"/TFTP\_DIRECTORY\=\"\/home\/embeddev\/tftpboot\"/g' /etc/default/tftpd-hpa \
+  && sed -i 's/srv\/tftp/tftpboot/g' /etc/default/tftpd-hpa \
+  && sed -i 's/secure/secure \-\-create/g' /etc/default/tftpd-hpa \
+  && tee /etc/xinetd.d/tftp <<EOF
+service tftp
+{
+    socket_type     = dgram
+    protocol        = udp
+    wait            = yes
+    user            = root
+    server          = /usr/sbin/in.tftpd
+    server_args     = -s /home/embeddev/tftpboot
+    disable         = no
+}
+EOF
+
+# Create user embeddev and run the rest of the dockerfile with that user
+ARG USER_GID="1000"
+ARG USER_UID="1000"
+
+RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
+    groupadd --gid ${USER_GID} embeddev && \
+    useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --comment "" embeddev && \
+    mkdir -p /home/embeddev/petalinux_tales /home/embeddev/petalinux && \
+    chown -R embeddev:embeddev /home/embeddev/ && \
+    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen
+
+ENV LANG=en_US.utf8
+
+USER embeddev
+
+WORKDIR /home/embeddev
+
+RUN git config --global user.email "embeddev@automation.com" && git config --global user.name "embeddev"
