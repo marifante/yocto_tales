@@ -7,22 +7,40 @@ It contains:
 * The kernel configuration
 * The U-Boot configuration
 
+
 To create a BSP we should do the following:
-1) Create and export hardware design (HDF/XSA) from Vivado
-2) Create a blank Yocto project without a BSP
-3) Customize the blank Yocto project to fit our needs
-4) Package that Yocto project into a BSP
 
-Steps 2 to 4 can be done using a convenience script:
+1) Create a docker container with the required setup. You can use the script `scripts/dockershell.sh`.
+2) Setup yocto:
 
-yocto_tales create-bsp --xsa xsa/artyz710_minimal_system_wrapper.xsa --dir work --template zynq --output bsp/new_bsp.bsp
+```bash
+repo init -u https://github.com/Xilinx/yocto-manifests.git -b rel-v2023.2
+repo sync
+source setupsdk
+```
 
-During the process, the following output files will be created in work directory:
-* ${WORK_DIRECTORY}/images/linux/BOOT.BIN
-* ${WORK_DIRECTORY}/images/linux/image.ub
-* ${WORK_DIRECTORY}/images/linux/boot.scr
-* ${WORK_DIRECTORY}/images/linux/rootfs.tar.gz
+3) Build the linux image with yocto. Select the correct image with MACHINE env var:
 
-If you want to directly use this BSP to boot a linux in the device, you should copy BOOT.BIN, image.ub and boot.scr to boot partition of the micro SD. Also, you will need to extract rootfs.tar.gz file into rootfs partition.
+```bash
+MACHINE=zynq-generic bitbake petalinux-image-minimal
+```
+
+This process can take some time. If it is the first time you run it you will not have anything cached, which will lead into a big ETA.
+
+During the process, the following output files will be created in work directory (specifically in ${WORK_DIRECTORY}/build/tmp/deploy/images/zynq-generic) and should be copied to `boot` partition on the SD:
+* boot.scr -> `${SD}/boot/boot.scr`
+* boot.bin -> `${SD}/boot/boot.bin`
+* zynq-generic-system.dtb -> `${SD}/boot/system.dtb`
+* If your processor is 32 bits: uImage -> `${SD}/boot/uImage`
+* If your processor is 64 bits: Image -> `${SD}/boot/Image`
+
+Also the rootfs will be there, you can extract it in rootfs partition of the SD as well:
+
+* tar xf petalinux-image-minimal-zynq-generic.tar.gz -c -C `${SD}/rootfs`
+
 There is a convenience script in `scripts/burn_to_sd.sh` that takes care of this part of the process. That script will format the SD and copy all the necessary files.
 
+# References
+
+* https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841862/Install+and+Build+with+Xilinx+yocto
+* https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/2823422188/Building+Yocto+Images+using+a+Docker+Container

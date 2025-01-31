@@ -28,7 +28,7 @@ RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /bin/repo && c
 
 # Set folder for tftp server and configure xinetd to run it
 RUN mkdir -p /home/embeddev/tftpboot && chmod 666 /home/embeddev/tftpboot \
-  && sed -i 's/TFTP\_USERNAME\=\"tftp\"/TFTP\_USERNAME\=\"petalinux\"/g' /etc/default/tftpd-hpa \
+  && sed -i 's/TFTP\_USERNAME\=\"tftp\"/TFTP\_USERNAME\=\"yocto\"/g' /etc/default/tftpd-hpa \
   && sed -i 's/TFTP\_DIRECTORY\=\"\/tftpboot\"/TFTP\_DIRECTORY\=\"\/home\/embeddev\/tftpboot\"/g' /etc/default/tftpd-hpa \
   && sed -i 's/srv\/tftp/tftpboot/g' /etc/default/tftpd-hpa \
   && sed -i 's/secure/secure \-\-create/g' /etc/default/tftpd-hpa \
@@ -52,7 +52,7 @@ ARG USER_UID="1000"
 RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
     groupadd --gid ${USER_GID} embeddev && \
     useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --comment "" embeddev && \
-    mkdir -p /home/embeddev/petalinux_tales /home/embeddev/petalinux && \
+    mkdir -p /home/embeddev/yocto_tales && \
     chown -R embeddev:embeddev /home/embeddev/ && \
     echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
