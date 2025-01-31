@@ -40,6 +40,13 @@ Also the rootfs will be there, you can extract it in rootfs partition of the SD 
 
 There is a convenience script in `scripts/burn_to_sd.sh` that takes care of this part of the process. That script will format the SD and copy all the necessary files.
 
+# Tweaking device tree
+
+You can always reverse the `.dtb` to see what is the actual `.dts` behind it:
+```
+dtc -I dtb -O dts -o system.dts zynq-generic-system.dtb
+```
+
 # References
 
 * https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841862/Install+and+Build+with+Xilinx+yocto

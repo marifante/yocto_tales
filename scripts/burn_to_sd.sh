@@ -126,6 +126,8 @@ copy_images() {
 		"${LINUX_IMAGES_DIR}/uImage" \
 		"${MOUNT_POINT}"
 
+	cp "${LINUX_IMAGES_DIR}/${MACHINE}-system.dtb" "${MOUNT_POINT}/system.dtb"
+
 	umount ${BOOT_PARTITION}
 }
 
