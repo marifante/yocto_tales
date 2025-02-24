@@ -95,21 +95,33 @@ wipe() {
 
 create_partitions() {
 	log "Creating a new partition table on $DEVICE..."
-	parted $DEVICE --script mklabel msdos
+	fdisk $DEVICE <<EOF
+    o
+    n
+    p
+    1
 
-	log "Creating a boot partition..."
-	parted $DEVICE --script mkpart primary fat32 4MiB 1028MiB
+    +1G
+    t
+    c
+    n
+    p
+    2
+
+
+    w
+EOF
+
+	echo "Waiting for partitions to settle..."
+	sleep 2
 
 	BOOT_PARTITION="${DEVICE}p1"
 	log "Formatting the partition $BOOT_PARTITION with FAT32..."
-	mkfs.vfat -n boot -F 32 $BOOT_PARTITION
-
-	log "Creating a rootfs partition..."
-	parted $DEVICE --script mkpart primary ext4 1028MiB 100%
+	mkfs.vfat -n BOOT -F 32 $BOOT_PARTITION
 
 	ROOTFS_PARTITION="${DEVICE}p2"
 	log "Formatting the partition $ROOTFS_PARTITION with EXT4..."
-	mkfs.ext4 -L RootFS $ROOTFS_PARTITION
+	mkfs.ext4 -L rootfs $ROOTFS_PARTITION
 }
 
 copy_images() {
@@ -120,13 +132,9 @@ copy_images() {
 	mount $BOOT_PARTITION $MOUNT_POINT
 
 	rsync -avL --progress --no-owner --no-group \
-		"${LINUX_IMAGES_DIR}/boot.bin" \
-		"${LINUX_IMAGES_DIR}/boot.scr" \
-		"${LINUX_IMAGES_DIR}/${MACHINE}-system.dtb" \
-		"${LINUX_IMAGES_DIR}/uImage" \
+		"${LINUX_IMAGES_DIR}/BOOT.bin" \
+		"${LINUX_IMAGES_DIR}/image.ub" \
 		"${MOUNT_POINT}"
-
-	cp "${LINUX_IMAGES_DIR}/${MACHINE}-system.dtb" "${MOUNT_POINT}/system.dtb"
 
 	umount ${BOOT_PARTITION}
 }

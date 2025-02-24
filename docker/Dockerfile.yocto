@@ -54,7 +54,8 @@ RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
     useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --comment "" embeddev && \
     mkdir -p /home/embeddev/yocto_tales && \
     chown -R embeddev:embeddev /home/embeddev/ && \
-    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    echo 'echo "To setup yocto run "souce setupsdk" in /home/embeddev/yocto_tales/build"' >> /home/embeddev/.bashrc
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
@@ -63,6 +64,6 @@ ENV LANG=en_US.utf8
 
 USER embeddev
 
-WORKDIR /home/embeddev
+WORKDIR /home/embeddev/yocto_tales/work
 
 RUN git config --global user.email "embeddev@automation.com" && git config --global user.name "embeddev"

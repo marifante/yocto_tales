@@ -4,7 +4,7 @@
 1) Boot ROM: reads the value of the boot strapping pins to determine the boot mode (JTAG, NAND flash, QSPI Flash, SD Card, etc). Then it will load the First Stage BootLoader (FSBL) image from the interface specified by the boot mode.
 
 2) First Stage Bootloader: The FSBL execute some instructions to initialise the PS with and to configure the PL with a given bitstream.
-The FSBL is included inside the `boot.bin` file.
+The FSBL is included inside the `BOOT.bin` file. Also, this `BOOT.bin` contains inside the bitstream to be burned into the PL.
 
 3) Second Stage Bootloader: This is U-boot.
 

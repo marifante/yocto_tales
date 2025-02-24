@@ -29,17 +29,18 @@ MACHINE=zynq-generic bitbake ${RECIPE}
 This process can take some time. If it is the first time you run it you will not have anything cached, which will lead into a big ETA.
 
 During the process, the following output files will be created in work directory (specifically in ${WORK_DIRECTORY}/build/tmp/deploy/images/zynq-generic) and should be copied to `boot` partition on the SD:
-* boot.scr -> `${SD}/boot/boot.scr`
-* boot.bin -> `${SD}/boot/boot.bin`
-* zynq-generic-system.dtb -> `${SD}/boot/system.dtb`
-* If your processor is 32 bits: uImage -> `${SD}/boot/uImage`
-* If your processor is 64 bits: Image -> `${SD}/boot/Image`
+* boot.scr
+* boot.bin
+* zynq-generic-system.dtb
+* uImage (for 32 bit processors) and Image (for 64 bits processors)
+
+The only needed binary to boot up from SD is `boot.bin`. So you need to copy it to the boot partition of the SD (often as `BOOT.bin`).
+There is a convenience script in `scripts/burn_to_sd.sh` that takes care of this part of the process. That script will format the SD and copy all the necessary files.
 
 Also the rootfs will be there, you can extract it in rootfs partition of the SD as well:
 
 * tar xf petalinux-image-minimal-zynq-generic.tar.gz -c -C `${SD}/rootfs`
 
-There is a convenience script in `scripts/burn_to_sd.sh` that takes care of this part of the process. That script will format the SD and copy all the necessary files.
 
 # Tweaking device tree
 
