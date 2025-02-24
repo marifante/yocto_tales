@@ -15,8 +15,6 @@ jobs:
 
       - name: Build Yocto Docker Image
         run: |
-          ls -lash
-          tree -L 4
           uid="$(id -u)"
           gid="$(id -g)"
           docker build -t yocto-builder \
@@ -26,7 +24,7 @@ jobs:
       - name: Run Yocto Build
         run: |
           docker run --rm --privileged -v ${{ github.workspace }}:/workspace -w /workspace/work yocto-builder /bin/bash -c "
-          source setupsdk && cd build &&
+          ls -lash && tree -L 4 && source setupsdk && cd build &&
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7 &&
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf &&
           echo 'BB_NUMBER_THREADS = \"$(nproc)\"' >> conf/local.conf &&
