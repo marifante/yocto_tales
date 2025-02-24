@@ -23,16 +23,16 @@ jobs:
 
       - name: Run Yocto Build
         run: |
-          docker run --rm --privileged -v ${{ github.workspace }}:/workspace -w /workspace/work yocto-builder /bin/bash -c "
-          ls -lash && tree -L 4 && source setupsdk && cd build &&
-          bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7 &&
-          echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf &&
-          echo 'BB_NUMBER_THREADS = \"$(nproc)\"' >> conf/local.conf &&
-          echo 'PARALLEL_MAKE = \"-j$(nproc)\"' >> conf/local.conf &&
-          bitbake petalinux-image-minimal"
+          docker run --rm --privileged -v ${{ github.workspace }}:/workspace -w /workspace/work yocto-builder /bin/bash -c "ls -lash & tree -L 4"
+          #          ls -lash && tree -L 4 && source setupsdk && cd build &&
+          #          bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7 &&
+          #          echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf &&
+          #          echo 'BB_NUMBER_THREADS = \"$(nproc)\"' >> conf/local.conf &&
+          #          echo 'PARALLEL_MAKE = \"-j$(nproc)\"' >> conf/local.conf &&
+          #          bitbake petalinux-image-minimal"
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: BOOT.bin
-          path: build/tmp/deploy/images/zynq-generic/boot.bin
+      #      - name: Upload build artifacts
+      #        uses: actions/upload-artifact@v4
+      #        with:
+      #          name: BOOT.bin
+      #          path: build/tmp/deploy/images/zynq-generic/boot.bin
