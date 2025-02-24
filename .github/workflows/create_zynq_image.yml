@@ -1,38 +1,78 @@
-name: Build Zynq-Generic image
+name: Build linux images
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  yocto-build:
+  build-and-push-image:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
-          submodules: recursive
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Yocto Docker Image
-        run: |
-          uid="$(id -u)"
-          gid="$(id -g)"
-          docker build -t yocto-builder \
-            -f ${{ github.workspace }}/docker/Dockerfile.yocto \
-            --build-arg USER_UID=${uid} --build-arg USER_GID=${gid} .
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Run Yocto Build
-        run: |
-          docker run --rm --privileged -v ${{ github.workspace }}:/workspace -w /workspace/work yocto-builder /bin/bash -c "ls -lash & tree -L 4"
-          #          ls -lash && tree -L 4 && source setupsdk && cd build &&
-          #          bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7 &&
-          #          echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf &&
-          #          echo 'BB_NUMBER_THREADS = \"$(nproc)\"' >> conf/local.conf &&
-          #          echo 'PARALLEL_MAKE = \"-j$(nproc)\"' >> conf/local.conf &&
-          #          bitbake petalinux-image-minimal"
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: ${{ github.workspace }}/docker/Dockerfile.yocto
 
-      #      - name: Upload build artifacts
-      #        uses: actions/upload-artifact@v4
-      #        with:
-      #          name: BOOT.bin
-      #          path: build/tmp/deploy/images/zynq-generic/boot.bin
+  #  yocto-build:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - name: Checkout repository
+  #        uses: actions/checkout@v4
+  #        with:
+  #          submodules: recursive
+  #
+  #      - name: Build Yocto Docker Image
+  #        run: |
+  #          uid="$(id -u)"
+  #          gid="$(id -g)"
+  #          docker build -t yocto-builder \
+  #            -f ${{ github.workspace }}/docker/Dockerfile.yocto \
+  #            --build-arg USER_UID=${uid} --build-arg USER_GID=${gid} .
+  #
+  #      - name: Run Yocto Build
+  #        run: |
+  #          docker run --rm --privileged -v ${{ github.workspace }}:/workspace -w /workspace/work yocto-builder /bin/bash -c "ls -lash & tree -L 4"
+  #          #          ls -lash && tree -L 4 && source setupsdk && cd build &&
+  #          #          bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7 &&
+  #          #          echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf &&
+  #          #          echo 'BB_NUMBER_THREADS = \"$(nproc)\"' >> conf/local.conf &&
+  #          #          echo 'PARALLEL_MAKE = \"-j$(nproc)\"' >> conf/local.conf &&
+  #          #          bitbake petalinux-image-minimal"
+  #
+  #      #      - name: Upload build artifacts
+  #      #        uses: actions/upload-artifact@v4
+  #      #        with:
+  #      #          name: BOOT.bin
+  #      #          path: build/tmp/deploy/images/zynq-generic/boot.bin
