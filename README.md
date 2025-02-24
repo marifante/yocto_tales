@@ -8,7 +8,7 @@ The main idea is that we have a docker image with all the necessary tools.
 We can create a local image and then enter to that shell using `scripts/dockershell.sh`.
 Therefore, if we need to enter to that container in another terminal we can use: `docker exec -it <container_name> /bin/bash`. Be sure that you'll need to execute the entrypoint afterwards to have the environment ready: `source entrypoint.sh bash`.
 
-# Layers
+# Layers as submodules
 
 Since this repository uses git submodules, make sure to init the submodules at least once when you clone it:
 
