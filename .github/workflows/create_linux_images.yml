@@ -51,7 +51,7 @@ jobs:
       - name: Create Job Outputs
         id: set-outputs
         run: |
-          image="ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.tags }}"
+          image="${{ steps.meta.outputs.tags }}"
           echo "Created and pushed ${image} docker image!"
           echo "image=${image}" >> "$GITHUB_OUTPUT"
 
