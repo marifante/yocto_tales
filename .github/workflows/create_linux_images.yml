@@ -70,7 +70,7 @@ jobs:
       - name: Build zyn image
         run: |
           ls -lash
-          souce setupsdk
+          source setupsdk
           cd build
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf
