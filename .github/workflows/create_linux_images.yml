@@ -60,6 +60,7 @@ jobs:
     needs: build-and-push-docker-image
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
+      options: --user root
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
