@@ -70,7 +70,10 @@ jobs:
       - name: Build zyn image
         run: |
           ls -lash
+          repo init -u https://github.com/Xilinx/yocto-manifests.git -b rel-v2023.2
+          repo sync
           source setupsdk
+          ls -lash
           cd build
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf
