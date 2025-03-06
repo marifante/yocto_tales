@@ -60,8 +60,9 @@ jobs:
     needs: build-and-push-docker-image
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
+
     steps:
-        - name: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
