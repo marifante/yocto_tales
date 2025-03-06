@@ -1,0 +1,10 @@
+#!/bin/bash
+
+setup_yocto() {
+	source /home/embeddev/setup_yocto.sh "$@"
+}
+
+# Export function for child processes
+export -f setup_yocto
+
+echo "To setup yocto run setup_yocto :D"

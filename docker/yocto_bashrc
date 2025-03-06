@@ -1,5 +1,0 @@
-setup_yocto() {
-    source /home/embeddev/setup_yocto.sh "$@"
-}
-
-echo "To setup yocto run setup_yocto :D"
