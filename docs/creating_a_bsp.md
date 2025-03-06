@@ -19,6 +19,12 @@ repo sync
 source setupsdk
 ```
 
+OR, you can use a convenience script for that:
+
+```
+setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d <PATH_WHERE_YOCTO_WILL_BE_SETUP>
+```
+
 3) Build the linux image with yocto. Select the correct image with MACHINE env var and pick the correct recipe.
 
 ```bash

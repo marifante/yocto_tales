@@ -54,8 +54,10 @@ RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
     useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --comment "" embeddev && \
     mkdir -p /home/embeddev/yocto_tales && \
     chown -R embeddev:embeddev /home/embeddev/ && \
-    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
-    echo 'echo "To setup yocto run "souce setupsdk" in /home/embeddev/yocto_tales/build"' >> /home/embeddev/.bashrc
+    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+COPY docker/yocto_bashrc /home/embeddev/.bashrc
+COPY scripts/setup_yocto.sh /home/embeddev/setup_yocto.sh
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
