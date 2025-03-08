@@ -70,7 +70,8 @@ jobs:
 
       - name: Build zynq image
         run: |
-          source /home/embeddev/setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
+          source /home/embeddev/setup_yocto_at_login
+          setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
           cd build
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf
