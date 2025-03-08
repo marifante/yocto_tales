@@ -1,5 +1,3 @@
-#!/bin/bash
-
 setup_yocto() {
 	source /home/embeddev/setup_yocto.sh "$@"
 }
