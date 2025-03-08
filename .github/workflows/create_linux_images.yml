@@ -60,18 +60,19 @@ jobs:
     needs: build-and-push-docker-image
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
-      options: --user root
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Manually Clone Repository
+        run: |
+          git clone --recursive --branch ${{ github.head_ref }} https://github.com/${{ github.repository }}.git /home/embeddev/workspace
+          cd /home/embeddev/workspace
+          git config --global --add safe.directory /home/embeddev/workspace  # Prevent permission errors
 
       - name: Build zynq image
         run: |
+          cd /home/embeddev/workspace
           source /home/embeddev/setup_yocto_at_login
-          setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
+          setup_yocto -r https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
           cd build
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf
