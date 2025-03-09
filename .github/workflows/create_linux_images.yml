@@ -22,23 +22,23 @@ jobs:
       image: ${{ steps.set-outputs.outputs.image }}
 
     steps:
-      - name: Checkout repository
+      - name: 🌀 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
+      - name: 😎 Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: 📤 Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push Docker image
+      - name: 🔨 Build and push Docker image
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
@@ -48,7 +48,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: ${{ github.workspace }}/docker/Dockerfile.yocto
 
-      - name: Create Job Outputs
+      - name: ✅ Create Job Outputs
         id: set-outputs
         run: |
           image="${{ steps.meta.outputs.tags }}"
@@ -62,15 +62,20 @@ jobs:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
 
     steps:
-      - name: Manually Clone Repository
+      - name: 🌀 Manually Clone Repository
         run: |
-          git clone --branch ${{ github.head_ref }} --single-branch --no-checkout https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
+          echo "Cloning repo without submodules..."
+          GIT_CLONE_NO_SUBMODULES=1 git clone --branch ${{ github.head_ref }} \
+            --single-branch --config submodule.recurse=false \
+            https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
+
           cd /home/embeddev/workspace/yocto_tales_repo
-          git -c submodule.fetchJobs=0 checkout ${{ github.head_ref }}
+
+          echo "Initializing submodules..."
           git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive
 
-      - name: Build zynq image
+      - name: 🔨 Build zynq image
         run: |
           cd /home/embeddev/workspace/yocto_tales_repo
           source /home/embeddev/setup_yocto_at_login
@@ -82,7 +87,7 @@ jobs:
           echo 'PARALLEL_MAKE = \"-j$(nproc)\"' >> conf/local.conf
           bitbake petalinux-image-minimal
 
-      - name: Upload build artifacts
+      - name: ⬆️  Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: BOOT.bin
