@@ -64,8 +64,9 @@ jobs:
     steps:
       - name: Manually Clone Repository
         run: |
-          git clone --branch ${{ github.head_ref }} https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
+          git clone --branch ${{ github.head_ref }} --single-branch --no-checkout https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
           cd /home/embeddev/workspace/yocto_tales_repo
+          git -c submodule.fetchJobs=0 checkout ${{ github.head_ref }}
           git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive
 
