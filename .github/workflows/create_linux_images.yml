@@ -65,8 +65,10 @@ jobs:
       - name: 🌀 Manually Clone Repository
         run: |
           echo "Cloning repo without submodules..."
+          git config --list
           export GIT_CONFIG_NOSYSTEM=1  # Ignore system-level config
           git config --global --file "/home/embeddev/.gitconfig" submodule.recurse false
+          git config --list
           GIT_CLONE_NO_SUBMODULES=1 git clone --branch ${{ github.head_ref }} \
             --single-branch --config submodule.recurse=false \
             https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
