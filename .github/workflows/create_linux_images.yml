@@ -64,13 +64,14 @@ jobs:
     steps:
       - name: Manually Clone Repository
         run: |
+          git clone --branch ${{ github.head_ref }} https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
+          cd /home/embeddev/workspace/yocto_tales_repo
           git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          git clone --recursive --branch ${{ github.head_ref }} https://github.com/${{ github.repository }}.git /home/embeddev/workspace
-          cd /home/embeddev/workspace
+          git submodule update --init --recursive
 
       - name: Build zynq image
         run: |
-          cd /home/embeddev/workspace
+          cd /home/embeddev/workspace/yocto_tales_repo
           source /home/embeddev/setup_yocto_at_login
           setup_yocto -r https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
           cd build
