@@ -70,4 +70,6 @@ USER embeddev
 
 WORKDIR /home/embeddev/yocto_tales/work
 
-RUN git config --global user.email "embeddev@automation.com" && git config --global user.name "embeddev"
+RUN git config --global user.email "embeddev@automation.com" && \
+    git config --global user.name "embeddev" && \
+    git config --global submodule.recurse false

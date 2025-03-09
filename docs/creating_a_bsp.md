@@ -29,7 +29,7 @@ setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d 
 
 ```bash
 export RECIPE="petalinux-image-minimal"
-MACHINE=zynq-generic bitbake ${RECIPE}
+MACHINE=arty-z7-generic bitbake ${RECIPE}
 ```
 
 This process can take some time. If it is the first time you run it you will not have anything cached, which will lead into a big ETA.
