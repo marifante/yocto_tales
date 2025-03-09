@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Manually Clone Repository
         run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           git clone --recursive --branch ${{ github.head_ref }} https://github.com/${{ github.repository }}.git /home/embeddev/workspace
           cd /home/embeddev/workspace
 
