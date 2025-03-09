@@ -66,10 +66,10 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 
 ENV LANG=en_US.utf8
 
-USER embeddev
-
-WORKDIR /home/embeddev/yocto_tales/work
-
 RUN git config --global user.email "embeddev@automation.com" && \
     git config --global user.name "embeddev" && \
     git config --global submodule.recurse false
+
+USER embeddev
+
+WORKDIR /home/embeddev/yocto_tales/work

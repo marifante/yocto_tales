@@ -64,6 +64,9 @@ jobs:
     steps:
       - name: 🌀 Manually Clone Repository
         run: |
+          git config --list --show-origin
+          git config --global --list
+          git config --system --list
           echo "Cloning repo without submodules..."
           GIT_CLONE_NO_SUBMODULES=1 git clone --branch ${{ github.head_ref }} \
             --single-branch --config submodule.recurse=false \
