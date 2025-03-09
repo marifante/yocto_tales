@@ -60,6 +60,8 @@ jobs:
     needs: build-and-push-docker-image
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
+    env:
+      HOME: /home/embeddev
 
     steps:
       - name: 🌀 Manually Clone Repository
