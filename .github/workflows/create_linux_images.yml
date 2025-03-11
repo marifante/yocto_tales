@@ -76,6 +76,8 @@ jobs:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
     env:
       HOME: /home/embeddev
+    volumes:
+      - repo_volume:/home/embeddev/workspace/yocto_tales_repo
 
     steps:
       - name: ⬇️  Download the artifact
