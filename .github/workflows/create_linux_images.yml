@@ -79,8 +79,8 @@ jobs:
       - name: 🏗 Create workspace with correct permissions
         run: |
           mkdir -p /home/embeddev/workspace/yocto_tales_repo && chmod -R 777 /home/embeddev/workspace
-          export DEV_UID = $(id -u)
-          export DEV_GID = $(id -g)
+          export DEV_UID=$(id -u)
+          export DEV_GID=$(id -g)
           echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
 
       - name: ⬇️  Download the artifact
