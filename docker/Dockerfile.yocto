@@ -67,11 +67,10 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 ENV LANG=en_US.utf8
 
 COPY docker/.gitconfig /home/embeddev/.gitconfig
+COPY docker/.gitconfig /etc/gitconfig
 
-RUN touch /etc/gitconfig && \
-    git config --global user.email "embeddev@automation.com" && \
-    git config --global user.name "embeddev" && \
-    git config --global submodule.recurse false
+RUN git config --global user.email "embeddev@automation.com" && \
+    git config --global user.name "embeddev"
 
 USER embeddev
 
