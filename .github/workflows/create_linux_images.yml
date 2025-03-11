@@ -74,10 +74,12 @@ jobs:
     needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
-      volumes:
-        - repo_volume:/home/embeddev/workspace/yocto_tales_repo
+      options: --user embeddev
 
     steps:
+      - name: 🏗 Create workspace with correct permissions
+        run: mkdir -p /home/embeddev/workspace/yocto_tales_repo && chmod -R 777 /home/embeddev/workspace
+
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
         with:
