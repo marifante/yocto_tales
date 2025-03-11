@@ -56,6 +56,7 @@ RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
     chown -R embeddev:embeddev /home/embeddev/ && \
     echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
+COPY docker/.gitconfig /home/embeddev/.gitconfig
 COPY docker/setup_yocto_at_login /home/embeddev/setup_yocto_at_login
 COPY scripts/setup_yocto.sh /home/embeddev/setup_yocto.sh
 
