@@ -55,26 +55,40 @@ jobs:
           echo "Created and pushed ${image} docker image!"
           echo "image=${image}" >> "$GITHUB_OUTPUT"
 
+  clone-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🌀 Checkout current repository (optional)
+        uses: actions/checkout@v4
+
+      - name: ⬆️  Upload current repository as artifact
+        id: upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-repo
+          path: .
+
   build-zynq-image:
     runs-on: ubuntu-latest
-    needs: build-and-push-docker-image
+    needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
     env:
       HOME: /home/embeddev
 
     steps:
-      - name: 🌀 Manually Clone Repository
-        run: |
-          git config --list --show-origin
-          git config --global --list
-          git config --system --list
-          echo "Cloning repo without submodules..."
-          GIT_CLONE_NO_SUBMODULES=1 git clone --branch ${{ github.head_ref }} \
-            --single-branch --config submodule.recurse=false \
-            https://github.com/${{ github.repository }}.git /home/embeddev/workspace/yocto_tales_repo
+      - name: ⬇️  Download the artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: current-repo
+          path: /home/embeddev/workspace/yocto_tales_repo
 
+      - name: 🌀 Init yocto layers
+        run: |
           cd /home/embeddev/workspace/yocto_tales_repo
+
+          ls -lash
 
           echo "Initializing submodules..."
           git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
