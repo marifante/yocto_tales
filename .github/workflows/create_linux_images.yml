@@ -83,7 +83,7 @@ jobs:
           export DEV_GID=$(id -g)
           echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
 
-          mkdir -p /home/runner/work/_temp/_github_workflow/
+          sudo mkdir -p /home/runner/work/_temp/_github_workflow/
 
           sudo chown -R ${DEV_UID}:${DEV_GID} /__w/
           sudo chmod -R 775 /__w/
