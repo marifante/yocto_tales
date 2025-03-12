@@ -92,6 +92,19 @@ jobs:
           echo "/__w/_temp/_runner_file_commands/"
           ls -lash /__w/_temp/_runner_file_commands/
 
+          sudo chown -R ${DEV_UID}:${DEV_GID} /__w/
+          sudo chmod -R 775 /__w/
+
+          echo "/__w/"
+          ls -lash /__w/
+
+          echo "/__w/_temp/"
+          ls -lash /__w/_temp/
+
+          echo "/__w/_temp/_runner_file_commands/"
+          ls -lash /__w/_temp/_runner_file_commands/
+
+
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
         with:
