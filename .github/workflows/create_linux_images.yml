@@ -83,17 +83,10 @@ jobs:
           export DEV_GID=$(id -g)
           echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
 
-          echo "/home/runner/"
-          ls -lash /home/runner/
+          mkdir -p /home/runner/work/_temp/_github_workflow/
 
           sudo chown -R ${DEV_UID}:${DEV_GID} /__w/
           sudo chmod -R 775 /__w/
-
-          sudo chown -R ${DEV_UID}:${DEV_GID} /home/runner/
-          sudo chmod -R 755 /home/runner
-
-          echo "/home/runner/"
-          ls -lash /home/runner/
 
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
