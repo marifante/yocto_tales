@@ -74,20 +74,9 @@ jobs:
     needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
+      options: --user root
 
     steps:
-      - name: 🏗 Create workspace with correct permissions
-        run: |
-          mkdir -p /home/embeddev/workspace/yocto_tales_repo && chmod -R 777 /home/embeddev/workspace
-          export DEV_UID=$(id -u)
-          export DEV_GID=$(id -g)
-          echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
-
-          sudo mkdir -p /home/runner/work/_temp/_github_workflow/
-
-          sudo chown -R ${DEV_UID}:${DEV_GID} /__w/
-          sudo chmod -R 775 /__w/
-
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
         with:
