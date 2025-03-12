@@ -83,27 +83,17 @@ jobs:
           export DEV_GID=$(id -g)
           echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
 
-          echo "/__w/"
-          ls -lash /__w/
-
-          echo "/__w/_temp/"
-          ls -lash /__w/_temp/
-
-          echo "/__w/_temp/_runner_file_commands/"
-          ls -lash /__w/_temp/_runner_file_commands/
+          echo "/home/runner/"
+          ls -lash /home/runner/
 
           sudo chown -R ${DEV_UID}:${DEV_GID} /__w/
           sudo chmod -R 775 /__w/
 
-          echo "/__w/"
-          ls -lash /__w/
+          sudo chown -R ${DEV_UID}:${DEV_GID} /home/runner/
+          sudo chmod -R 755 /home/runner
 
-          echo "/__w/_temp/"
-          ls -lash /__w/_temp/
-
-          echo "/__w/_temp/_runner_file_commands/"
-          ls -lash /__w/_temp/_runner_file_commands/
-
+          echo "/home/runner/"
+          ls -lash /home/runner/
 
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
