@@ -83,6 +83,15 @@ jobs:
           export DEV_GID=$(id -g)
           echo "UID = ${DEV_UID} & GID = ${DEV_GID}"
 
+          echo "/__w/"
+          ls -lash /__w/
+
+          echo "/__w/_temp/"
+          ls -lash /__w/_temp/
+
+          echo "/__w/_temp/_runner_file_commands/"
+          ls -lash /__w/_temp/_runner_file_commands/
+
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
         with:
