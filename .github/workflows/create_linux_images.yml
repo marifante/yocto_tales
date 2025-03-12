@@ -67,7 +67,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: current-repo
-          path: .
+          path: |
+            .git
+            .
 
   build-zynq-image:
     runs-on: ubuntu-latest
