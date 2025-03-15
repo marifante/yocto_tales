@@ -90,7 +90,7 @@ jobs:
         run: |
           cd /home/embeddev/workspace/yocto_tales_repo
           ls -lash
-          git config --local url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           echo "----------------------> git config --list"
           git config --list
           echo "----------------------> git config --list --show-origin"
