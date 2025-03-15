@@ -61,6 +61,8 @@ jobs:
     steps:
       - name: 🌀 Checkout current repository (optional)
         uses: actions/checkout@v4
+        with:
+          path: repo
 
       - name: ⬆️  Upload current repository as artifact
         id: upload-artifact
@@ -68,6 +70,7 @@ jobs:
         with:
           name: current-repo
           include-hidden-files: true
+          path: repo/
 
   build-zynq-image:
     runs-on: ubuntu-latest
