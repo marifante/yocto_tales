@@ -77,7 +77,6 @@ jobs:
     needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
-      options: --user root
 
     steps:
       - name: ⬇️  Download the artifact
