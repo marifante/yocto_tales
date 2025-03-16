@@ -81,7 +81,7 @@ jobs:
     steps:
       # The "cleanup old checkout" step is needed because of this bug: https://github.com/actions/checkout/issues/1014
       - name: cleanup old checkout
-        run: chmod +w -R ${{ github.workspace }}; rm -rf ${{ github.workspace }}/*;
+        run: mkdir -p ${{ github.workspace }}; chmod +w -R ${{ github.workspace }}; rm -rf ${{ github.workspace }}/*;
 
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
