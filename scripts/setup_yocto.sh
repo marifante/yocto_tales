@@ -77,6 +77,8 @@ main() {
 	cd ${DIRECTORY}
 	repo init -u ${REPOSITORY} -b ${REPOSITORY_TAG}
 	repo sync
+	log "Repositories already synced"
+	ls -lash
 	source setupsdk
 	log "Yocto already setup in ${DIRECTORY}! :)"
 }

@@ -1,4 +1,5 @@
 setup_yocto() {
+    echo "Running setup_yocto in this shell!!!!"
 	source /home/embeddev/setup_yocto.sh "$@"
 }
 
