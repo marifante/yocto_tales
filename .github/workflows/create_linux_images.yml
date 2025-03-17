@@ -98,6 +98,7 @@ jobs:
           cd /home/embeddev/workspace/yocto_tales_repo
           source /home/embeddev/setup_yocto_at_login
           setup_yocto -r https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
+          bitbake petalinux-image-minimal
           cd build
           bitbake-layers add-layer bitbake-layers add-layer ../layers/meta-artyz7
           echo 'MACHINE = \"zynq-generic\"' >> conf/local.conf
