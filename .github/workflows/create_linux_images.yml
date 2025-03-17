@@ -96,6 +96,7 @@ jobs:
       - name: 🔨 Build zynq image
         run: |
           cd /home/embeddev/workspace/yocto_tales_repo
+          sudo su embeddev
           source /home/embeddev/setup_yocto_at_login
           setup_yocto -r https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d $(pwd)
           bitbake petalinux-image-minimal
