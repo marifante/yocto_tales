@@ -89,12 +89,7 @@ jobs:
       - name: 🌀 Init yocto layers submodules
         run: |
           cd /home/embeddev/workspace/yocto_tales_repo
-          ls -lash
           git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          echo "----------------------> git config --list"
-          git config --list
-          echo "----------------------> git config --list --show-origin"
-          git config --list --show-origin
           echo "Initializing submodules..."
           git submodule update --init --recursive
 

@@ -79,7 +79,7 @@ main() {
 	repo sync
 	log "Repositories already synced"
 	ls -lash
-	source setupsdk
+	source ${DIRECTORY}/setupsdk
 	log "Yocto already setup in ${DIRECTORY}! :)"
 }
 
