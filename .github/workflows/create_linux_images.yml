@@ -66,6 +66,7 @@ jobs:
 
       - name: 🌀 Init yocto layers submodules
         run: |
+          cd repo
           git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           echo "Initializing submodules..."
           git submodule update --init --recursive
