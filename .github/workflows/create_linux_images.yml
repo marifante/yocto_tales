@@ -59,10 +59,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🌀 Checkout current repository (optional)
+      - name: 🌀 Checkout current repository
         uses: actions/checkout@v4
         with:
           path: repo
+
+      - name: 🌀 Init yocto layers submodules
+        run: |
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          echo "Initializing submodules..."
+          git submodule update --init --recursive
 
       - name: ⬆️  Upload current repository as artifact
         id: upload-artifact
@@ -77,7 +83,6 @@ jobs:
     needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
-      options: --user root
 
     steps:
       - name: ⬇️  Download the artifact
@@ -85,13 +90,6 @@ jobs:
         with:
           name: current-repo
           path: /home/embeddev/workspace/yocto_tales_repo
-
-      - name: 🌀 Init yocto layers submodules
-        run: |
-          cd /home/embeddev/workspace/yocto_tales_repo
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          echo "Initializing submodules..."
-          git submodule update --init --recursive
 
       - name: 🔨 Build zynq image
         run: |
