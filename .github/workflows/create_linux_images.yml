@@ -84,16 +84,18 @@ jobs:
     needs: [clone-repo, build-and-push-docker-image]
     container:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
+      options: --user root
 
     steps:
       - name: ⬇️  Download the artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: current-repo
           path: /home/embeddev/workspace/yocto_tales_repo
 
       - name: 🔨 Build zynq image
         run: |
+          sudo su embeddev
           cd /home/embeddev/workspace/yocto_tales_repo
           sudo su embeddev
           source /home/embeddev/setup_yocto_at_login
