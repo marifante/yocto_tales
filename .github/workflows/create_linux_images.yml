@@ -96,6 +96,7 @@ jobs:
       - name: 🔨 Build zynq image
         run: |
           sudo su embeddev
+          echo "Running this step as: $(whoami)"
           cd /home/embeddev/workspace/yocto_tales_repo
           sudo su embeddev
           source /home/embeddev/setup_yocto_at_login
