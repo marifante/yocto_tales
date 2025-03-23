@@ -88,15 +88,18 @@ jobs:
     steps:
       - name: ㊙️ Setting up permissions for non-root user
         run: |
-          RUNNER_DIR="/__w/_temp/_runner_file_commands/"
-          echo "Modifying the permissions of ${RUNNER_DIR}"
-          ls -lash ${RUNNER_DIR}
+          runner_dirs=( "/__w/_temp/_runner_file_commands/" "/home/runner/work/_temp/_runner_file_commands" )
 
-          mkdir -p ${RUNNER_DIR}
-          sudo chown -R embeddev:embeddev ${RUNNER_DIR}
+          for dir2mod in "${runner_dirs[@]}"; do
+            echo "Modifying the permissions of ${dir2mod}"
+            ls -lash ${dir2mod}
 
-          echo "New permissions of ${RUNNER_DIR}"
-          ls -lash ${RUNNER_DIR}
+            mkdir -p ${dir2mod}
+            sudo chown -R embeddev:embeddev ${dir2mod}
+
+            echo "New permissions of ${dir2mod}"
+            ls -lash ${dir2mod}
+          done
 
       - name: ⬇️  Download the artifact
         uses: actions/download-artifact@v4
