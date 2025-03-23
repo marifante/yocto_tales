@@ -19,11 +19,17 @@ repo sync
 source setupsdk
 ```
 
+OR, you can use a convenience script for that:
+
+```
+setup_yocto -r  https://github.com/Xilinx/yocto-manifests.git -t rel-v2023.2 -d <PATH_WHERE_YOCTO_WILL_BE_SETUP>
+```
+
 3) Build the linux image with yocto. Select the correct image with MACHINE env var and pick the correct recipe.
 
 ```bash
 export RECIPE="petalinux-image-minimal"
-MACHINE=zynq-generic bitbake ${RECIPE}
+MACHINE=arty-z7-generic bitbake ${RECIPE}
 ```
 
 This process can take some time. If it is the first time you run it you will not have anything cached, which will lead into a big ETA.
