@@ -1,0 +1,55 @@
+name: arty_z7_100
+layers:
+
+  - uri: "git@github.com:Xilinx/xilinx/meta-xilinx"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-xilinx-tools"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-arm"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-petalinux"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-xilinx-tsn"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-kria"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-embedded-plus"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/poky"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-mingw"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-virtualization"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-security"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-openembedded"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-openamp"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-qt5"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-aws"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-ros"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-rauc"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-jupyter"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-system-controller"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-vitis"
+    revision: "rel-v2024.2"
+  - uri: "git@github.com:Xilinx/xilinx/meta-amd-adaptive-socs"
+    revision: "rel-v2024.2"
+
+setup:
+  command:
+    - call: setupsdk
+  conf:
+    path: conf/local.conf
+
+bitbake:
+  command:
+    - call: petalinux-image-minimal

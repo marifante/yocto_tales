@@ -18,6 +18,7 @@ help() {
 }
 ###############################################################################
 ## Parameters
+ONLY_HELP=""
 
 ## Fixed variables
 SCRIPT_PATH=$(readlink -f "$0")
@@ -34,6 +35,7 @@ parse_args() {
 		-h | --help)
 			shift
 			help
+			ONLY_HELP=""
 			;;
 		-r | --repository)
 			shift
@@ -84,5 +86,7 @@ main() {
 }
 
 parse_args "$@"
-check_prereq
-main
+if [ -n "${ONLY_HELP}" ]; then
+	check_prereq
+	main
+fi

@@ -1,0 +1,18 @@
+name: raspberry_pi_3
+
+layers:
+  - uri: git://git.yoctoproject.org/poky
+    revision: dunfell
+
+  - uri: git://git.openembedded.org/meta-openembedded
+    revision: dunfell
+
+setup:
+  command:
+    - call: source oe-init-build-env
+      path: ./layers/poky
+  conf:
+    path: conf/local.conf
+
+bitbake:
+  image: core-image-base
