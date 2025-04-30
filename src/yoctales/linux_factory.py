@@ -2,7 +2,7 @@ import logging
 import yaml
 import os
 
-from yoctales.cmd import CommandShell, CommandGitClone
+from yoctales.cmd import CommandShell, CommandGitClone, CommandExecuteInShellScript
 
 
 logger = logging.getLogger(__name__)
@@ -69,12 +69,17 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
                                             revision = layer['revision'],
                                             cwd = os.path.join(work_directory, "layers")))
 
-    for idx, cmd in enumerate(yaml_data['setup']['command']):
-        invoker.add_command(CommandShell(name = f"setup command {idx:3}",
-                                         call = cmd['call'],
-                                         cwd = os.path.join(work_directory, cmd['path'])))
+    if 'setup' in yaml_data:
+        for idx, cmd in enumerate(yaml_data['setup']['command']):
+            invoker.add_command(CommandShell(name = f"setup command {idx:3}",
+                                             call = cmd['call'],
+                                             cwd = os.path.join(work_directory, cmd['path'])))
 
-    invoker.add_command(CommandShell(name = "build image with bitbake", call = f"bitbake {yaml_data['bitbake']['image']}"))
+    source = "" if not "source" in yaml_data['bitbake'] else f"source {os.path.join(work_directory, os.path.join(yaml_data['bitbake']['source']['path'], yaml_data['bitbake']['source']['call']))};\n "
+
+    invoker.add_command(CommandExecuteInShellScript(name = "build_image_with_bitbake",
+                                                    call = f"{source}bitbake {yaml_data['bitbake']['image']}\n",
+                                                    cwd = work_directory))
 
     logger.info(f"Plan:\n{invoker.describe_plan()}")
 

@@ -7,12 +7,9 @@ layers:
   - uri: git://git.openembedded.org/meta-openembedded
     revision: dunfell
 
-setup:
-  command:
-    - call: source oe-init-build-env
-      path: ./layers/poky
-  conf:
-    path: conf/local.conf
-
 bitbake:
   image: core-image-base
+  source:
+    call: oe-init-build-env
+    path: ./layers/poky
+
