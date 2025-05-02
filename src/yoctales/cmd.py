@@ -8,6 +8,8 @@ import re
 from datetime import datetime
 import stat
 
+from yoctales.shell import execute_in_shell
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,74 +74,15 @@ class CommandShell(Command):
         If the exit code of the command is non-zero or is not found then
         raise a CommandFailed exception.
         """
-        _, _, exit_code, command_not_found = self._execute_in_shell()
+        _, _, exit_code, command_not_found = execute_in_shell(call = self.call,
+                                                              cwd = self.cwd,
+                                                              shell = self.shell)
 
         if exit_code != 0:
             raise CommandFailed(f"{self._fail_prefix}Exit code is not zero (it is {exit_code})")
 
         if command_not_found:
             raise CommandFailed(f"{self._fail_prefix}Command not found")
-
-    def _execute_in_shell(self) -> tuple:
-        """Executes a shell command and retrieves stdout, stderr, and exit code.
-
-        :param command: The shell command to execute.
-        :param cwd: The directory where the command will be executed. If none is given
-        the same directory where the script is executed will be used.
-        :returns: (stdout, stderr, exit_code, command_not_found)
-        """
-        stdout = ""
-        stderr = ""
-        process_finished = False
-
-        args = self.call if self.shell else shlex.split(self.call)
-        logger.info(f"Executing: \"{args}\"")
-
-        try:
-            with subprocess.Popen(args, stdout=subprocess.PIPE,  # Capture standard output
-                                  stderr=subprocess.PIPE,  # Capture standard error
-                                  text=True,
-                                  cwd=self.cwd,
-                                  shell=self.shell) as process:
-
-                while not process_finished:
-                    reads = []
-
-                    if process.stdout:
-                        reads.append(process.stdout.fileno())
-
-                    if process.stderr:
-                        reads.append(process.stderr.fileno())
-
-                    ret = select.select(reads, [], [])
-
-                    for fd in ret[0]:
-                        if process.stdout and fd == process.stdout.fileno():
-                            stdout_line = process.stdout.readline()
-                            if stdout_line:
-                                logger.info(stdout_line)
-                                stdout += stdout_line
-                        elif process.stderr and fd == process.stderr.fileno():
-                            stderr_line = process.stderr.readline()
-                            if stderr_line:
-                                logger.error(stderr_line)
-                                stderr += stderr_line
-
-                    # Check if the process has finished
-                    if process.poll() is not None:
-                        process_finished = True
-
-                exit_code = process.returncode  # Get the exit code
-
-                command_not_found = (exit_code == 127) or ("command not found" in stderr.lower())
-
-        except FileNotFoundError as excpt:
-            logger.error(f"Command \"{self.call}\" not found: {excpt}")
-            stdout, stderr = "", "Command not found"
-            exit_code = 127
-            command_not_found = True
-
-        return stdout, stderr, exit_code, command_not_found
 
 
 class CommandGitClone(CommandShell):
@@ -177,8 +120,10 @@ class CommandExecuteInShellScript(CommandShell):
         super().__init__(*args, **kwargs)
 
         self._call_body = self.call
-        self._tmp_script_path = f"{os.path.join(self.cwd, self.name)}_tmp_script"
-        self.call = os.path.join(".", self._tmp_script_path)
+        self._tmp_script_name = f"{self.name}_tmp_script"
+        self._tmp_script_path = f"{os.path.join(self.cwd, self._tmp_script_name)}"
+        self.call = os.path.join(".", self._tmp_script_name)
+
         self._create_temporary_script_file()
 
     def _create_temporary_script_file(self) -> None:
@@ -188,7 +133,7 @@ class CommandExecuteInShellScript(CommandShell):
 
         with open(self._tmp_script_path, 'w') as tmp_file:
             tmp_file.write(header)
-            tmp_file.writelines(self._call_body.split(';'))
+            tmp_file.writelines(self._call_body)
 
         current_permissions = os.stat(self._tmp_script_path).st_mode
         os.chmod(self._tmp_script_path, current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)

@@ -9,7 +9,5 @@ layers:
 
 bitbake:
   image: core-image-base
-  source:
-    call: oe-init-build-env
-    path: ./layers/poky
-
+  setup:
+    - call: source ./layers/poky/oe-init-build-env

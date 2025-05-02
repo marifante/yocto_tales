@@ -3,6 +3,7 @@ import yaml
 import os
 
 from yoctales.cmd import CommandShell, CommandGitClone, CommandExecuteInShellScript
+from yoctales.config_parser import ConfigParser
 
 
 logger = logging.getLogger(__name__)
@@ -29,8 +30,9 @@ class LinuxImageInvoker:
 
     def execute_all(self) -> None:
         """ Execute all the needed commands to build (invoke) the linux image. """
-        for command in self.commands:
+        for idx, command in enumerate(self.commands):
             try:
+                logger.info(f"Executing step {idx}: ({command})")
                 command.execute()
             except Exception as exc:
                 logger.error(f"Command failed: {exc}")
@@ -51,11 +53,9 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
     :param dry_run: set to True if you want to only process the config file
     and check the steps that will be taken.
     """
-    # Parse config file and create commands
-    with open(config_file, "r") as file:
-        yaml_data = yaml.safe_load(file)
+    config = ConfigParser(config_file)
 
-    work_directory = f"work/{yaml_data['name']}"
+    work_directory = f"work/{config.name}"
 
     invoker = LinuxImageInvoker()
 
@@ -63,22 +63,20 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
 
     invoker.add_command(CommandShell(name = "create work directory", call = f"mkdir -p {work_directory}/layers"))
 
-    for idx, layer in enumerate(yaml_data['layers']):
+    for idx, layer in enumerate(config.layers):
         invoker.add_command(CommandGitClone(name = f"clone layer {idx:3}",
                                             uri = layer['uri'],
                                             revision = layer['revision'],
                                             cwd = os.path.join(work_directory, "layers")))
 
-    if 'setup' in yaml_data:
-        for idx, cmd in enumerate(yaml_data['setup']['command']):
+    if config.setup:
+        for idx, cmd in enumerate(config.setup['command']):
             invoker.add_command(CommandShell(name = f"setup command {idx:3}",
                                              call = cmd['call'],
                                              cwd = os.path.join(work_directory, cmd['path'])))
 
-    source = "" if not "source" in yaml_data['bitbake'] else f"source {os.path.join(work_directory, os.path.join(yaml_data['bitbake']['source']['path'], yaml_data['bitbake']['source']['call']))};\n "
-
     invoker.add_command(CommandExecuteInShellScript(name = "build_image_with_bitbake",
-                                                    call = f"{source}bitbake {yaml_data['bitbake']['image']}\n",
+                                                    call = '\n'.join([config.bitbake['setup_script'], config.bitbake['command']]),
                                                     cwd = work_directory))
 
     logger.info(f"Plan:\n{invoker.describe_plan()}")

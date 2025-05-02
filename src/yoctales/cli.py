@@ -8,8 +8,8 @@ from yoctales.linux_factory import create_linux_image
 
 
 FORMAT = (
-    "%(asctime)-15s %(threadName)-15s "
-    "%(levelname)-8s %(module)-15s:%(lineno)-8s %(message)s"
+    "%(asctime)-15s "
+    "%(levelname)-6s %(module)-15s:%(lineno)-8s %(message)s"
 )
 
 
