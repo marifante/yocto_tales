@@ -5,3 +5,6 @@ src/yocto_tales.egg-info/
 build/
 venv/
 src/yoctales.egg-info/
+.vscode/
+htmlcov/
+.coverage
