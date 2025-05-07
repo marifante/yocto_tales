@@ -32,4 +32,6 @@ jobs:
 
       - name: Run unit tests
         run: |
-          make run_all_unit_tests
+          make coverage 2>&1 | tee coverage.log
+          echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
+          cat coverage_output.log >> $GITHUB_STEP_SUMMARY
