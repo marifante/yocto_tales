@@ -8,3 +8,4 @@ src/yoctales.egg-info/
 .vscode/
 htmlcov/
 .coverage
+report.md
