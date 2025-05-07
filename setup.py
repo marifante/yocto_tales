@@ -11,12 +11,14 @@ This package contains a CLI to build up some Linux images using yocto.
 """
 
 def git_to_pep440(git_version):
-    """ Transforms the git version to an allowed pep404 version. """
+    """ Transforms the git version to an allowed pep404 version = vx.y.z.dev<SHORT_SHA_NUM>. """
     if '-' not in git_version:
         return git_version
 
+    cmd = 'git rev-parse --short HEAD'
+    sha = check_output(shlex.split(cmd)).decode('utf-8')
     sep = git_version.index('-')
-    version = git_version[:sep] + '+dev' + git_version[sep+1:].replace('-', '.')
+    version = git_version[:sep] + '.dev' + str(int(sha, 16))
     return version
 
 
