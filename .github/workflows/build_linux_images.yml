@@ -62,8 +62,12 @@ jobs:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
 
     steps:
-      - name: 🌀 Checkout repository
-        uses: actions/checkout@v4
+      - name: 🌀 Download config file
+        run: |
+          url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
+          echo "Downloading config file from ${url}..."
+          curl -o raspberry_py_3_minimal.yml "${url}"
+          cat raspberry_pi_3_minimal.yml
 
       - name: 🔨 Build image
         run: |
