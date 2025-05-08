@@ -33,4 +33,9 @@ jobs:
       - name: Run unit tests
         run: |
           make coverage 2>&1 | tee coverage.log
+
+          python3 scripts/pytest_cov_to_md.py --file coverage.log | tee -a report.md
+
           cat report.md >> $GITHUB_STEP_SUMMARY
+
+
