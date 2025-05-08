@@ -66,12 +66,12 @@ jobs:
         run: |
           url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
           echo "Downloading config file from ${url}..."
-          curl -o raspberry_py_3_minimal.yml "${url}"
-          cat raspberry_pi_3_minimal.yml
+          curl -o ${{ runner.temp }}/raspberry_py_3_minimal.yml "${url}"
+          cat ${{ runner.temp }}/raspberry_pi_3_minimal.yml
 
       - name: 🔨 Build image
         run: |
-          yoctales --config configs/raspberry_py_3_minimal.yml
+          cd ${{ runner.temp }} && yoctales --config configs/raspberry_py_3_minimal.yml
 
       - name: ⬆️  Upload build artifacts
         uses: actions/upload-artifact@v4
