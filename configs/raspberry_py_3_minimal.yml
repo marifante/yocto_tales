@@ -1,4 +1,4 @@
-name: raspberry_pi_3
+name: raspberry_pi_3_minimal
 
 layers:
   - uri: git://git.yoctoproject.org/poky
