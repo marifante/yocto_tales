@@ -36,7 +36,6 @@ jobs:
           fi
 
       - name: 😎 Log in to the Container registry
-        if: env.DOCKER_BUILD_NEEDED == 'true'
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
@@ -44,7 +43,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Extract metadata (tags, labels) for Docker
-        if: env.DOCKER_BUILD_NEEDED == 'true'
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:

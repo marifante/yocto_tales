@@ -11,6 +11,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    path:
+      - src
+      - tests
+      - requirements-dev.txt
+      - requirements.txt
+      - setup.py
 
     steps:
       - name: Checkout the repository
