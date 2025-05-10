@@ -1,14 +1,6 @@
 name: Run Python Unit Tests
 
 on:
-  push:
-    paths:
-      - src/**
-      - tests/**
-      - requirements-dev.txt
-      - requirements.txt
-      - setup.py
-      - .github/workflows/run_python_tests.yml
   pull_request:
     paths:
       - src/**
