@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    path:
+    paths:
       - src
       - tests
       - requirements-dev.txt

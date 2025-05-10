@@ -28,12 +28,21 @@ jobs:
 
       - name: 🌀 Determine if docker build is needed
         run: |
+          DOCKER_BUILD_NEEDED="false"
+          FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" "${{ github.workspace }}/.github/build_linux_images.yml" )
+          CHANGESET=$(git diff --name-only HEAD^ HEAD)
 
-         if git diff --name-only HEAD^ HEAD | grep -q "${{ env.DOCKERFILE }}"; then
-            echo "DOCKER_BUILD_NEEDED=true" >> $GITHUB_ENV
-          else
-            echo "DOCKER_BUILD_NEEDED=false" >> $GITHUB_ENV
-          fi
+          echo "Files that changed in this commit: ${CHANGESET}"
+
+          for FILE in "${FILES_TO_CHECK[@]}"; do
+            if echo "$CHANGESET" | grep -q "$FILE"; then
+              echo "File $FILE has changed in this commit. Docker build is needed."
+              DOCKER_BUILD_NEEDED=true
+              break
+            fi
+          done
+
+          echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
 
       - name: 😎 Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
@@ -58,6 +67,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ${{ github.workspace }}/docker/Dockerfile.yocto
+          # Use GitHub runner runners UID and GID, see: https://github.com/actions/jekyll-build-pages/issues/18
+          build-args: |
+            USER_GID=121
+            USER_UID=1001
 
       - name: ✅ Create Job Outputs
         id: set-outputs
