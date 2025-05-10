@@ -109,18 +109,19 @@ jobs:
           echo "UID: $(id -u)"
           echo "GID: $(id -g)"
           echo "Try to create a file to check permissions:"
-          touch test_file.txt
+          echo "This file is just to check permissions" > test_file.txt
+          cat test_file.txt
 
       - name: 🌀 Download config file
         run: |
           url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
           echo "Downloading config file from ${url}..."
-          curl -o ${{ runner.temp }}/raspberry_py_3_minimal.yml "${url}"
-          cat ${{ runner.temp }}/raspberry_pi_3_minimal.yml
+          curl -o ./raspberry_py_3_minimal.yml "${url}"
+          cat ./raspberry_pi_3_minimal.yml
 
       - name: 🔨 Build image
         run: |
-          cd ${{ runner.temp }} && yoctales --config configs/raspberry_py_3_minimal.yml
+          yoctales --config configs/raspberry_py_3_minimal.yml
 
       - name: ⬆️  Upload build artifacts
         uses: actions/upload-artifact@v4
