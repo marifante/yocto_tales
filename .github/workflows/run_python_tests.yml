@@ -2,21 +2,27 @@ name: Run Python Unit Tests
 
 on:
   push:
-    branches:
-      - raspberry_pi
+    paths:
+      - src/**
+      - tests/**
+      - requirements-dev.txt
+      - requirements.txt
+      - setup.py
+      - .github/workflows/run_python_tests.yml
   pull_request:
-    branches:
-      - raspberry_pi
+    paths:
+      - src/**
+      - tests/**
+      - requirements-dev.txt
+      - requirements.txt
+      - setup.py
+      - .github/workflows/run_python_tests.yml
+
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    paths:
-      - src
-      - tests
-      - requirements-dev.txt
-      - requirements.txt
-      - setup.py
+
 
     steps:
       - name: Checkout the repository
