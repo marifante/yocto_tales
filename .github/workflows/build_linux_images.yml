@@ -108,6 +108,8 @@ jobs:
           echo "user: $(whoami)"
           echo "UID: $(id -u)"
           echo "GID: $(id -g)"
+          echo "Try to create a file to check permissions:"
+          touch test_file.txt
 
       - name: 🌀 Download config file
         run: |
