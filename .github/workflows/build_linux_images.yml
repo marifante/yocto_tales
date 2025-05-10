@@ -34,14 +34,15 @@ jobs:
           DOCKER_BUILD_NEEDED="false"
           FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" "${{ github.workspace }}/.github/build_linux_images.yml" )
 
-          CURRENT_SHA=$(git rev-parse HEAD)
-          PREVIOUS_SHA=$(git rev-parse HEAD^)
+          # In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
+          # the same as the commit SHA that triggered the workflow. The current sha obtained from
+          # `git rev-parse HEAD` will be the SHA of the merge-commit created by GitHub infrastructure
+          # during the pull request.
+          CURRENT_SHA=$({ github.event.pull_request.head.sha }}
+          PREVIOUS_SHA=$(git rev-parse ${CURRENT_SHA}^)
           echo "Current SHA: ${CURRENT_SHA}, previous SHA: ${PREVIOUS_SHA}"
 
-          git log
-
           CHANGESET=$(git diff --name-only ${PREVIOU_SHA} ${CURRENT_SHA})
-
           echo "Files that changed in this commit: ${CHANGESET}"
 
           for FILE in "${FILES_TO_CHECK[@]}"; do
