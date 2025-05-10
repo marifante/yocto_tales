@@ -25,7 +25,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   DOCKERFILE: ${{ github.workspace }}/docker/Dockerfile.yocto
-  CURRENT_SHA: ${{ github.event.pull_request.head.sha }}
+  CURRENT_SHA: ${{ github.event.pull_request.head.sha || github.sha }} # Fallback to github.sha in case we are not in a pull request event
 
 jobs:
   build-and-push-docker-image:
