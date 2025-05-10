@@ -33,7 +33,14 @@ jobs:
         run: |
           DOCKER_BUILD_NEEDED="false"
           FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" "${{ github.workspace }}/.github/build_linux_images.yml" )
-          CHANGESET=$(git diff --name-only HEAD^ HEAD)
+
+          CURRENT_SHA=$(git rev-parse HEAD)
+          PREVIOUS_SHA=$(git rev-parse HEAD^)
+          echo "Current SHA: ${CURRENT_SHA}, previous SHA: ${PREVIOUS_SHA}"
+
+          git log
+
+          CHANGESET=$(git diff --name-only ${PREVIOU_SHA} ${CURRENT_SHA})
 
           echo "Files that changed in this commit: ${CHANGESET}"
 
