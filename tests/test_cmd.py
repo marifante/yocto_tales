@@ -101,13 +101,15 @@ def test_command_execute_in_shell_script_creation():
     with patch("yoctales.cmd.datetime") as datetime_mock, \
          patch("yoctales.cmd.os.chmod") as chmod_mock, \
          patch("yoctales.cmd.os.stat", return_value=MagicMock(st_mode=0x644)) as stat_mock, \
-         patch("yoctales.cmd.open", MagicMock()) as open_mock:
+         patch("yoctales.cmd.open", MagicMock()) as open_mock, \
+         patch("yoctales.cmd.os.makedirs") as makedirs_mock:
 
         datetime_mock.now.return_value = fixed_date
 
         CommandExecuteInShellScript(name="script", call=call_inside_script, cwd=".")
 
         chmod_mock.assert_called_once()
+        makedirs_mock.assert_called_once_with('.', exist_ok=True)
         stat_mock.assert_called_once_with(expected_tmp_script_path)
         assert open_mock.call_args_list[0] == call(expected_tmp_script_path, "w")
         open_mock().__enter__().write.assert_called_once_with(expected_file_content)
