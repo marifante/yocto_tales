@@ -37,7 +37,7 @@ jobs:
       - name: 🌀 Determine if docker build is needed
         run: |
           DOCKER_BUILD_NEEDED="false"
-          FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" "build_linux_images.yml" )
+          FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" )
 
           PREVIOUS_SHA=$(git rev-parse ${{ env.CURRENT_SHA }}^)
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
@@ -116,7 +116,7 @@ jobs:
         run: |
           url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
           echo "Downloading config file from ${url}..."
-          curl -o ./raspberry_py_3_minimal.yml "${url}"
+          curl -o ./raspberry_pi_3_minimal.yml "${url}"
           cat ./raspberry_pi_3_minimal.yml
 
       - name: 🔨 Build image
