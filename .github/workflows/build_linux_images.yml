@@ -6,7 +6,7 @@ on:
       - 'src/**'
       - 'requirements.txt'
       - 'setup.py'
-      - '.github/workflows/build-linux_images.yml'
+      - '.github/workflows/build_linux_images.yml'
       - 'docker/Dockerfile.yocto'
   pull_request:
     types: [opened, reopened]
