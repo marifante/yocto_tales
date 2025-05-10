@@ -4,18 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - src/**
-      - tests/**
-      - requirements-dev.txt
-      - requirements.txt
-      - setup.py
-      - .github/workflows/run_python_tests.yml
+      - 'src/**'
+      - 'tests/**'
+      - 'requirements-dev.txt'
+      - 'requirements.txt'
+      - 'setup.py'
+      - '.github/workflows/run_python_tests.yml'
 
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
 
     steps:
       - name: Checkout the repository
