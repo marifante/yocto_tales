@@ -1,8 +1,21 @@
 name: Build linux images
 
 on:
+  push:
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+      - 'setup.py'
+      - '.github/workflows/build-linux_images.yml'
+      - 'docker/Dockerfile.yocto'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened]
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+      - 'setup.py'
+      - '.github/workflows/build_linux_images.yml'
+      - 'docker/Dockerfile.yocto'
 
 # In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
 # the same as the commit SHA that triggered the workflow. The current sha obtained from
@@ -37,7 +50,7 @@ jobs:
       - name: 🌀 Determine if docker build is needed
         run: |
           DOCKER_BUILD_NEEDED="false"
-          FILES_TO_CHECK=( "${{ env.DOCKERFILE }}" )
+          FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" )
 
           PREVIOUS_SHA=$(git rev-parse ${{ env.CURRENT_SHA }}^)
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
@@ -111,6 +124,9 @@ jobs:
           echo "Try to create a file to check permissions:"
           echo "This file is just to check permissions" > test_file.txt
           cat test_file.txt
+
+          echo "Checking packages installed with pip inside the container:"
+          pip freeze
 
       - name: 🌀 Download config file
         run: |
