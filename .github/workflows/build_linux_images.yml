@@ -42,7 +42,7 @@ jobs:
           PREVIOUS_SHA=$(git rev-parse ${{ env.CURRENT_SHA }}^)
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
 
-          CHANGESET=$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA })
+          CHANGESET=$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})
           echo "Files that changed in this commit: ${CHANGESET}"
 
           for FILE in "${FILES_TO_CHECK[@]}"; do
