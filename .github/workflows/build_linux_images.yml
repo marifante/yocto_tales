@@ -62,6 +62,12 @@ jobs:
       image: ${{ needs.build-and-push-docker-image.outputs.image }}
 
     steps:
+      - name: 🌀 Verify container environment
+        run: |
+          ehoc "user: $(whoami)"
+          echo "UID: $(id -u)"
+          echo "GID: $(id -g)"
+
       - name: 🌀 Download config file
         run: |
           url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
