@@ -7,6 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DOCKERFILE: ${{ github.workspace }}/docker/Dockerfile.yocto
 
 jobs:
   build-and-push-docker-image:
@@ -25,7 +26,17 @@ jobs:
       - name: 🌀 Checkout repository
         uses: actions/checkout@v4
 
+      - name: 🌀 Determine if docker build is needed
+        run: |
+
+         if git diff --name-only HEAD^ HEAD | grep -q "${{ env.DOCKERFILE }}"; then
+            echo "DOCKER_BUILD_NEEDED=true" >> $GITHUB_ENV
+          else
+            echo "DOCKER_BUILD_NEEDED=false" >> $GITHUB_ENV
+          fi
+
       - name: 😎 Log in to the Container registry
+        if: env.DOCKER_BUILD_NEEDED == 'true'
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ${{ env.REGISTRY }}
@@ -33,12 +44,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Extract metadata (tags, labels) for Docker
+        if: env.DOCKER_BUILD_NEEDED == 'true'
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: 🔨 Build and push Docker image
+        if: env.DOCKER_BUILD_NEEDED == 'true'
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
@@ -52,8 +65,14 @@ jobs:
         id: set-outputs
         run: |
           image="${{ steps.meta.outputs.tags }}"
-          echo "Created and pushed ${image} docker image!"
+
+          if [ ${DOCKER_BUILD_NEEDED} == "false" ]; then
+          echo "DOCKER_BUILD_NEEDED is false, docker image creation was skipped. Using latest one: ${image}."
+          else
+            echo "DOCKER_BUILD_NEEDED is true, docker image was created and pushed. Pushed as ${image}."
+          fi
           echo "image=${image}" >> "$GITHUB_OUTPUT"
+
 
   build-raspberry-pi-3-minimal:
     runs-on: ubuntu-latest
@@ -64,7 +83,7 @@ jobs:
     steps:
       - name: 🌀 Verify container environment
         run: |
-          ehoc "user: $(whoami)"
+          echo "user: $(whoami)"
           echo "UID: $(id -u)"
           echo "GID: $(id -g)"
 
