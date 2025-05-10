@@ -9,3 +9,4 @@ src/yoctales.egg-info/
 htmlcov/
 .coverage
 report.md
+coverage.log

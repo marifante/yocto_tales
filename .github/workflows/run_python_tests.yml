@@ -50,4 +50,9 @@ jobs:
 
           cat report.md >> $GITHUB_STEP_SUMMARY
 
-
+          if grep -q "FAILED" coverage.log; then
+            echo "Unit tests failed. Check the logs above."
+            exit 1
+          else
+            echo "All unit tests passed."
+          fi
