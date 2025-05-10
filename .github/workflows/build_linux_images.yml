@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: 🌀 Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Fetch all history so tags are available
+          fetch-tags: true # Ensure tags are fetched
 
       - name: 🌀 Determine if docker build is needed
         run: |
