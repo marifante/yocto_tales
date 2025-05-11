@@ -23,9 +23,7 @@ on:
 # during the pull request.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   CURRENT_SHA: ${{ github.event.pull_request.head.sha || github.sha }} # Fallback to github.sha in case we are not in a pull request event
-  DOCKER_TAG_CURRENT_SHA: ghcr.io/${{ github.event.repository }}:${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   build-and-push-docker-image:
@@ -38,7 +36,7 @@ jobs:
       id-token: write
 
     outputs:
-      image: ${{ steps.set-outputs.outputs.image }}
+      image: ${{ steps.determine_if_build_is_needed.outputs.image }}
 
     steps:
       - name: 🌀 Checkout repository
@@ -48,6 +46,7 @@ jobs:
           fetch-tags: true # Ensure tags are fetched
 
       - name: 🌀 Determine if docker build is needed
+        id: determine_if_build_is_needed
         run: |
           DOCKER_BUILD_NEEDED="false"
           FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" "build_linux_images.yml" )
@@ -68,6 +67,10 @@ jobs:
 
           echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
 
+          IMAGE="ghcr.io/${{ github.repository }}:${{ env.CURRENT_SHA }}"
+          echo "Image related to this PR = ${IMAGE}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
       - name: 😎 Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -84,8 +87,9 @@ jobs:
         id: push
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
-          tags: ${{ env.DOCKER_TAG_CURRENT_SHA }}
+          tags: ${{ steps.determine_if_build_is_needed.outputs.image }}
           file: ${{ github.workspace }}/docker/Dockerfile.yocto
           # Use GitHub runner runners UID and GID, see: https://github.com/actions/jekyll-build-pages/issues/18
           build-args: |
@@ -99,18 +103,17 @@ jobs:
           echo "Pulling previous image ${PREVIOUS_IMAGE}..."
           docker pull ${PREVIOUS_IMAGE}
 
-          echo "Tagging previous image with current SHA ${{ env.DOCKER_TAG_CURRENT_SHA }}..."
-          docker tag ${{ env.DOCKER_TAG_CURRENT_SHA }}
+          echo "Tagging previous image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
+          docker tag ${{ steps.determine_if_build_is_needed.outputs.image }}
 
-          echo "Pushing image with current SHA ${{ env.DOCKER_TAG_CURRENT_SHA }}..."
-          docker push ${{ env.DOCKER_TAG_CURRENT_SHA }}
-
+          echo "Pushing image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
+          docker push ${{ steps.determine_if_build_is_needed.outputs.image }}
 
   build-raspberry-pi-3-minimal:
     runs-on: ubuntu-latest
     needs: [build-and-push-docker-image]
     container:
-      image: ${{ env.DOCKER_TAG_CURRENT_SHA }}
+      image: ${{ needs.build-and-push-docker-image.outputs.image }}
 
     steps:
       - name: 🌀 Verify container environment
