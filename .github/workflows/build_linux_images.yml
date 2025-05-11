@@ -129,8 +129,9 @@ jobs:
           pip freeze
 
           echo "Verify yoctales installation"
+          python -c "import sys; print(':'.join(x for x in sys.path if x))"
+
           yoctales --version
-          ls -lash ~/.local/lib/python3.8/site-packages
 
       - name: 🌀 Download config file
         run: |
