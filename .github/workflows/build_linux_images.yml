@@ -121,17 +121,11 @@ jobs:
           echo "user: $(whoami)"
           echo "UID: $(id -u)"
           echo "GID: $(id -g)"
-          echo "Try to create a file to check permissions:"
-          echo "This file is just to check permissions" > test_file.txt
-          cat test_file.txt
 
           echo "Checking packages installed with pip inside the container:"
           pip freeze
 
           echo "Verify yoctales installation"
-          python -c "import sys; print(':'.join(x for x in sys.path if x))"
-          python3 -c "import sys; print(':'.join(x for x in sys.path if x))"
-
           yoctales --version
 
       - name: 🌀 Download config file
@@ -143,7 +137,7 @@ jobs:
 
       - name: 🔨 Build image
         run: |
-          yoctales --config configs/raspberry_py_3_minimal.yml
+          yoctales --config raspberry_pi_3_minimal.yml
 
       - name: ⬆️  Upload build artifacts
         uses: actions/upload-artifact@v4
