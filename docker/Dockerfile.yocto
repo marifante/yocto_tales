@@ -76,10 +76,8 @@ COPY src/ /home/embeddev/yocto_tales/src/
 # Setup python3 as default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-USER embeddev
-
-ENV PATH="/home/embeddev/.local/bin:${PATH}"
-
 WORKDIR /home/embeddev/yocto_tales
 
 RUN pip install .
+
+USER embeddev
