@@ -130,6 +130,7 @@ jobs:
 
           echo "Verify yoctales installation"
           python -c "import sys; print(':'.join(x for x in sys.path if x))"
+          python3 -c "import sys; print(':'.join(x for x in sys.path if x))"
 
           yoctales --version
 
