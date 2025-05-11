@@ -128,6 +128,10 @@ jobs:
           echo "Checking packages installed with pip inside the container:"
           pip freeze
 
+          echo "Verify yoctales installation"
+          yoctales --version
+          ls -lash ~/.local/lib/python3.8/site-packages
+
       - name: 🌀 Download config file
         run: |
           url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
