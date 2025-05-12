@@ -1,0 +1,9 @@
+setup_yocto() {
+    echo "Running setup_yocto in this shell!!!!"
+	source /home/embeddev/setup_yocto.sh "$@"
+}
+
+# Export function for child processes
+export -f setup_yocto
+
+echo "To setup yocto run setup_yocto :D"

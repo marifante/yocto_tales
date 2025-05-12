@@ -1,0 +1,150 @@
+name: Build linux images
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+      - 'setup.py'
+      - '.github/workflows/build_linux_images.yml'
+      - 'docker/Dockerfile.yocto'
+  pull_request:
+    types: [opened, reopened]
+    paths:
+      - 'src/**'
+      - 'requirements.txt'
+      - 'setup.py'
+      - '.github/workflows/build_linux_images.yml'
+      - 'docker/Dockerfile.yocto'
+
+# In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
+# the same as the commit SHA that triggered the workflow. The current sha obtained from
+# git rev-parse HEAD will be the SHA of the merge-commit created by GitHub infrastructure
+# during the pull request.
+env:
+  REGISTRY: ghcr.io
+  CURRENT_SHA: ${{ github.event.pull_request.head.sha || github.sha }} # Fallback to github.sha in case we are not in a pull request event
+
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    outputs:
+      image: ${{ steps.determine_if_build_is_needed.outputs.image }}
+
+    steps:
+      - name: 🌀 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Fetch all history so tags are available
+          fetch-tags: true # Ensure tags are fetched
+
+      - name: 🌀 Determine if docker build is needed
+        id: determine_if_build_is_needed
+        run: |
+          DOCKER_BUILD_NEEDED="false"
+          FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" "build_linux_images.yml" )
+
+          PREVIOUS_SHA=$(git rev-parse ${{ env.CURRENT_SHA }}^)
+          echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
+
+          CHANGESET=$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})
+          echo "Files that changed in this commit: ${CHANGESET}"
+
+          for FILE in "${FILES_TO_CHECK[@]}"; do
+            if echo "$CHANGESET" | grep -q "$FILE"; then
+              echo "File $FILE has changed in this commit. Docker build is needed."
+              DOCKER_BUILD_NEEDED=true
+              break
+            fi
+          done
+
+          echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
+
+          IMAGE="ghcr.io/${{ github.repository }}:${{ env.CURRENT_SHA }}"
+          echo "Image related to this PR = ${IMAGE}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
+      - name: 😎 Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🌀 Set up Docker Buildx
+        if: env.DOCKER_BUILD_NEEDED == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔨 Build and push Docker image
+        if: env.DOCKER_BUILD_NEEDED == 'true'
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.determine_if_build_is_needed.outputs.image }}
+          file: ${{ github.workspace }}/docker/Dockerfile.yocto
+          # Use GitHub runner runners UID and GID, see: https://github.com/actions/jekyll-build-pages/issues/18
+          build-args: |
+            USER_GID=121
+            USER_UID=1001
+
+      - name: ⬆️ Pushing latest docker image with current SHA
+        if: env.DOCKER_BUILD_NEEDED == 'false'
+        run: |
+          PREVIOUS_IMAGE="ghcr.io/${{ github.event.repository }}:${PREVIOUS_SHA}"
+          echo "Pulling previous image ${PREVIOUS_IMAGE}..."
+          docker pull ${PREVIOUS_IMAGE}
+
+          echo "Tagging previous image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
+          docker tag ${{ steps.determine_if_build_is_needed.outputs.image }}
+
+          echo "Pushing image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
+          docker push ${{ steps.determine_if_build_is_needed.outputs.image }}
+
+  build-raspberry-pi-3-minimal:
+    runs-on: ubuntu-latest
+    needs: [build-and-push-docker-image]
+    container:
+      image: ${{ needs.build-and-push-docker-image.outputs.image }}
+
+    steps:
+      - name: 🌀 Verify container environment
+        run: |
+          echo "user: $(whoami)"
+          echo "UID: $(id -u)"
+          echo "GID: $(id -g)"
+
+          echo "Checking packages installed with pip inside the container:"
+          pip freeze
+
+          echo "Verify yoctales installation"
+          yoctales --version
+
+      - name: 🌀 Download config file
+        run: |
+          base_url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_pi_3_minimal/"
+          files=( "raspberry_pi_3_minimal.yml" "local.conf" "bblayers.conf" )
+          for file in "${files[@]}"; do
+            url="${base_url}${file}"
+            echo "Downloading ${file} from ${url}..."
+            curl -o "./${file}" "${url}"
+            cat "./${file}"
+          done
+
+      - name: 🔨 Build image
+        run: |
+          yoctales --config raspberry_pi_3_minimal.yml
+
+      - name: ⬆️  Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: raspberry_pi_3_minimal
+          path: work/raspberry_pi_3_minimal/build/tmp/deploy/images/

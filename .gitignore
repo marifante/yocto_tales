@@ -3,4 +3,10 @@ yocto-tales-venv/
 *.pyc
 src/yocto_tales.egg-info/
 build/
-build/
+venv/
+src/yoctales.egg-info/
+.vscode/
+htmlcov/
+.coverage
+report.md
+coverage.log
