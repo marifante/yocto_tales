@@ -43,6 +43,26 @@ class LinuxImageInvoker:
         return "\n".join([f"{step:3}: {cmd}" for step, cmd in enumerate(self.commands)])
 
 
+def scan_for_build_conf_files(path: str) -> list:
+    """ This function will scan the given path for all yocto build configuration files
+    and return a list with the paths to those files.
+
+    :return: a list with the paths of the configuration files.
+    :raises FileNotFoundError: If any of the files are not found.
+    """
+    files_to_scan = ["bblayers.conf", "local.conf"]
+    files_found = []
+
+    for file in files_to_scan:
+        file_path = os.path.join(path, file)
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File {file_path} not found. Please create it before running the tool.")
+        else:
+            files_found.append(file_path)
+
+    return files_found
+
+
 def create_linux_image(config_file: str, dry_run: bool = False) -> None:
     """
     Process a configuration file, pick the correct yoctale object and
@@ -53,6 +73,8 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
     :param dry_run: set to True if you want to only process the config file
     and check the steps that will be taken.
     """
+    build_conf_files = scan_for_build_conf_files(os.path.dirname(config_file))
+
     config = ConfigParser(config_file)
 
     work_directory = f"work/{config.name}"
@@ -61,7 +83,7 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
 
     logger.info("Creating plan to build linux image...")
 
-    invoker.add_command(CommandShell(name = "create work directory", call = f"mkdir -p {work_directory}/layers"))
+    invoker.add_command(CommandShell(name = "create work dir", call = f"mkdir -p {work_directory}/layers"))
 
     for idx, layer in enumerate(config.layers):
         invoker.add_command(CommandGitClone(name = f"clone layer {idx:3}",
@@ -69,14 +91,23 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
                                             revision = layer['revision'],
                                             cwd = os.path.join(work_directory, "layers")))
 
+    # Copy build configuration files to the work directory
+    work_build_conf_dir = os.path.join(work_directory, "build/conf")
+    invoker.add_command(CommandShell(name = "create build conf dir", call = f"mkdir -p {work_build_conf_dir}"))
+
+    for file in build_conf_files:
+        invoker.add_command(CommandShell(name = f"copy {os.path.basename(file)}",
+                                         call = f"cp {file} {work_build_conf_dir}"))
+
     if config.setup:
         for idx, cmd in enumerate(config.setup['command']):
             invoker.add_command(CommandShell(name = f"setup command {idx:3}",
                                              call = cmd['call'],
                                              cwd = os.path.join(work_directory, cmd['path'])))
 
+    build_script_cmds = [config.bitbake['setup_script'], config.bitbake['command']]
     invoker.add_command(CommandExecuteInShellScript(name = "build_image_with_bitbake",
-                                                    call = '\n'.join([config.bitbake['setup_script'], config.bitbake['command']]),
+                                                    call = '\n'.join(build_script_cmds),
                                                     cwd = work_directory))
 
     logger.info(f"Plan:\n{invoker.describe_plan()}")

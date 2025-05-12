@@ -130,10 +130,14 @@ jobs:
 
       - name: 🌀 Download config file
         run: |
-          url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_py_3_minimal.yml"
-          echo "Downloading config file from ${url}..."
-          curl -o ./raspberry_pi_3_minimal.yml "${url}"
-          cat ./raspberry_pi_3_minimal.yml
+          base_url="https://raw.githubusercontent.com/marifante/yocto_tales/${{ github.sha }}/configs/raspberry_pi_3_minimal/"
+          files=( "raspberry_pi_3_minimal.yml" "local.conf" "bblayers.conf" )
+          for file in "${files[@]}"; do
+            url="${base_url}${file}"
+            echo "Downloading ${file} from ${url}..."
+            curl -o "./${file}" "${url}"
+            cat "./${file}"
+          done
 
       - name: 🔨 Build image
         run: |
