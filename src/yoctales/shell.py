@@ -32,6 +32,10 @@ def execute_in_shell(call: str, cwd: str, shell: bool = False) -> tuple:
             while not process_finished:
                 reads = []
 
+                # Check if the process has finished
+                if process.poll() is not None:
+                    process_finished = True
+
                 if process.stdout:
                     reads.append(process.stdout.fileno())
 
@@ -43,18 +47,16 @@ def execute_in_shell(call: str, cwd: str, shell: bool = False) -> tuple:
                 for fd in ret[0]:
                     if process.stdout and fd == process.stdout.fileno():
                         stdout_line = process.stdout.readline()
-                        if stdout_line:
+                        while stdout_line:
                             logger.info(stdout_line.rstrip('\n'))
                             stdout += stdout_line
+                            stdout_line = process.stdout.readline()
                     elif process.stderr and fd == process.stderr.fileno():
                         stderr_line = process.stderr.readline()
-                        if stderr_line:
+                        while stderr_line:
                             logger.error(stderr_line.rstrip('\n'))
                             stderr += stderr_line
-
-                # Check if the process has finished
-                if process.poll() is not None:
-                    process_finished = True
+                            stderr_line = process.stderr.readline()
 
             exit_code = process.returncode  # Get the exit code
 

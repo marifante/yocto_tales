@@ -1,6 +1,6 @@
 import logging
-import yaml
 import os
+import time
 
 from yoctales.cmd import CommandShell, CommandGitClone, CommandExecuteInShellScript
 from yoctales.config_parser import ConfigParser
@@ -73,6 +73,7 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
     :param dry_run: set to True if you want to only process the config file
     and check the steps that will be taken.
     """
+    t0 = time.monotonic()
     build_conf_files = scan_for_build_conf_files(os.path.dirname(config_file))
 
     config = ConfigParser(config_file)
@@ -114,3 +115,6 @@ def create_linux_image(config_file: str, dry_run: bool = False) -> None:
 
     if not dry_run:
         invoker.execute_all()
+
+    duration_m = (time.monotonic() - t0)/60
+    logger.info(f"Linux image creation took {duration_m:.5f} minutes.")
