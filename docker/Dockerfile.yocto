@@ -6,7 +6,7 @@ RUN \
         dpkg --add-architecture i386 && \
         apt-get update && \
         apt-get install -yq sudo build-essential git nano vim\
-          python3-yaml libncursesw5 libncursesw5:i386 \
+          python3-yaml python3-pip libncursesw5 libncursesw5:i386 \
           python python3 man bash diffstat gawk chrpath wget cpio \
           texinfo lzop apt-utils bc screen libncurses5-dev locales \
           libc6-dev-i386 doxygen libssl-dev dos2unix xvfb x11-utils \
@@ -54,16 +54,19 @@ RUN echo "Creating user embeddev with GID=${USER_GID} and UID=${USER_UID}" && \
     useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash --comment "" embeddev && \
     mkdir -p /home/embeddev/yocto_tales && \
     chown -R embeddev:embeddev /home/embeddev/ && \
-    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
-    echo 'echo "To setup yocto run "souce setupsdk" in /home/embeddev/yocto_tales/build"' >> /home/embeddev/.bashrc
+    echo 'embeddev ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
 
 ENV LANG=en_US.utf8
 
+RUN git config --global user.email "embeddev@automation.com" && \
+    git config --global user.name "embeddev"
+
+# Setup python3 as default
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+WORKDIR /home/embeddev/yocto_tales
+
 USER embeddev
-
-WORKDIR /home/embeddev/yocto_tales/work
-
-RUN git config --global user.email "embeddev@automation.com" && git config --global user.name "embeddev"
