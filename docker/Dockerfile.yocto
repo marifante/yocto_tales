@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS yoctales_base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -70,3 +70,15 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 WORKDIR /home/embeddev/yocto_tales
 
 USER embeddev
+
+ENV PATH="/home/embeddev/.local/bin:${PATH}"
+
+# In second stage install KAS to manage bitbake configs
+FROM yoctales_base AS yoctales_kas
+
+ARG KAS_VERSION=4.7
+
+RUN git clone https://github.com/siemens/kas.git /home/embeddev/kas && \
+    cd /home/embeddev/kas && \
+    git checkout 4.7 && \
+    pip install .
