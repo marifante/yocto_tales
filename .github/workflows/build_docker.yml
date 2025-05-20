@@ -44,7 +44,7 @@ jobs:
           CURRENT_SHA_IMAGE="${IMAGE}:${{ env.CURRENT_SHA }}"
           PREVIOUS_SHA_IMAGE="${IMAGE}:${PREVIOUS_SHA}"
 
-          echo "Image related to this PR = ${IMAGE}"
+          echo "Image related to this PR = ${CURRENT_SHA_IMAGE}"
           echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
           echo "CURRENT_SHA_IMAGE=${CURRENT_SHA_IMAGE}" >> "$GITHUB_ENV"
           echo "PREVIOUS_SHA_IMAGE=${PREVIOUS_SHA_IMAGE}" >> "$GITHUB_ENV"
