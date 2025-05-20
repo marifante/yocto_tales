@@ -1,13 +1,6 @@
 on:
-  push:
-    paths:
-      - '.github/workflows/build_docker.yml'
-      - 'docker/Dockerfile.yocto'
   pull_request:
-    types: [opened, reopened]
-    paths:
-      - '.github/workflows/build_docker.yml'
-      - 'docker/Dockerfile.yocto'
+    types: [opened, reopened, synchronize]
 
 # In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
 # the same as the commit SHA that triggered the workflow. The current sha obtained from
@@ -28,7 +21,7 @@ jobs:
       id-token: write
 
     outputs:
-      image: ${{ steps.determine_if_build_is_needed.outputs.image }}
+      image: ${{ steps.determine_if_build_is_needed.outputs.image_tag }}
 
     steps:
       - name: 🌀 Checkout repository
@@ -59,9 +52,11 @@ jobs:
 
           echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
 
-          IMAGE="ghcr.io/${{ github.repository }}:${{ env.CURRENT_SHA }}"
+          IMAGE="ghcr.io/${{ github.repository }}"
+          IMAGE_TAG="${IMAGE}:${{ env.CURRENT_SHA }}"
           echo "Image related to this PR = ${IMAGE}"
           echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: 😎 Log in to the Container registry
         uses: docker/login-action@v3
@@ -81,7 +76,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.determine_if_build_is_needed.outputs.image }}
+          tags: ${{ steps.determine_if_build_is_needed.outputs.image_tag }}
           file: ${{ github.workspace }}/docker/Dockerfile.yocto
           # Use GitHub runner runners UID and GID, see: https://github.com/actions/jekyll-build-pages/issues/18
           build-args: |
@@ -95,8 +90,16 @@ jobs:
           echo "Pulling previous image ${PREVIOUS_IMAGE}..."
           docker pull ${PREVIOUS_IMAGE}
 
-          echo "Tagging previous image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
-          docker tag ${{ steps.determine_if_build_is_needed.outputs.image }}
+          echo "Tagging previous image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image_tag }}..."
+          docker tag ${{ steps.determine_if_build_is_needed.outputs.image_tag }}
 
-          echo "Pushing image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
-          docker push ${{ steps.determine_if_build_is_needed.outputs.image }}
+          echo "Pushing image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image_tag }}..."
+          docker push ${{ steps.determine_if_build_is_needed.outputs.image_tag }}
+
+      - name: 🌀 Tagging image as latest
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+            echo "This commit is being pushed to the default branch. Tagging image as latest."
+            docker push ${{ steps.determine_if_build_is_needed.outputs.image }}:latest
+
+
