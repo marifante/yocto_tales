@@ -1,13 +1,6 @@
 on:
-  push:
-    paths:
-      - '.github/workflows/build_docker.yml'
-      - 'docker/Dockerfile.yocto'
   pull_request:
-    types: [opened, reopened]
-    paths:
-      - '.github/workflows/build_docker.yml'
-      - 'docker/Dockerfile.yocto'
+    types: [opened, reopened, synchronize]
 
 # In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
 # the same as the commit SHA that triggered the workflow. The current sha obtained from
@@ -28,7 +21,7 @@ jobs:
       id-token: write
 
     outputs:
-      image: ${{ steps.determine_if_build_is_needed.outputs.image }}
+      image: ${{ steps.determine_if_build_is_needed.outputs.image_tag }}
 
     steps:
       - name: 🌀 Checkout repository
@@ -37,51 +30,82 @@ jobs:
           fetch-depth: 0   # Fetch all history so tags are available
           fetch-tags: true # Ensure tags are fetched
 
-      - name: 🌀 Determine if docker build is needed
-        id: determine_if_build_is_needed
+      - name: 🌀 Determine metadata
         run: |
-          DOCKER_BUILD_NEEDED="false"
-          FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" "build_linux_images.yml" )
-
           PREVIOUS_SHA=$(git rev-parse ${{ env.CURRENT_SHA }}^)
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
+          echo "PREVIOUS_SHA=${PREVIOUS_SHA}" >> $GITHUB_ENV
 
           CHANGESET=$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})
           echo "Files that changed in this commit: ${CHANGESET}"
+          echo "CHANGESET=${CHANGESET}" >> $GITHUB_ENV
 
-          for FILE in "${FILES_TO_CHECK[@]}"; do
-            if echo "$CHANGESET" | grep -q "$FILE"; then
-              echo "File $FILE has changed in this commit. Docker build is needed."
-              DOCKER_BUILD_NEEDED=true
-              break
-            fi
-          done
+          IMAGE="ghcr.io/${{ github.repository }}"
+          CURRENT_SHA_IMAGE="${IMAGE}:${{ env.CURRENT_SHA }}"
+          PREVIOUS_SHA_IMAGE="${IMAGE}:${PREVIOUS_SHA}"
 
-          echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
+          echo "Image related to this PR = ${CURRENT_SHA_IMAGE}"
+          echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
+          echo "CURRENT_SHA_IMAGE=${CURRENT_SHA_IMAGE}" >> "$GITHUB_ENV"
+          echo "PREVIOUS_SHA_IMAGE=${PREVIOUS_SHA_IMAGE}" >> "$GITHUB_ENV"
 
-          IMAGE="ghcr.io/${{ github.repository }}:${{ env.CURRENT_SHA }}"
-          echo "Image related to this PR = ${IMAGE}"
-          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
-
-      - name: 😎 Log in to the Container registry
+      - name: 🐳  Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🌀 Set up Docker Buildx
-        if: env.DOCKER_BUILD_NEEDED == 'true'
+      - name: 🐳 Determine if exists an image from the previous commit
+        run: |
+          PREVIOUS_SHA_IMAGE_EXISTS="false"
+          if docker manifest inspect "${{ env.PREVIOUS_SHA_IMAGE }}" > /dev/null 2>&1; then
+            echo "Docker image ${{ env.PREVIOUS_SHA_IMAGE }} exists in the registry."
+            PREVIOUS_SHA_IMAGE_EXISTS="true"
+          else
+            echo "Docker image ${{ env.PREVIOUS_SHA_IMAGE }} does not exist in the registry."
+          fi
+
+          echo "PREVIOUS_SHA_IMAGE_EXISTS=${PREVIOUS_SHA_IMAGE_EXISTS}" >> $GITHUB_ENV
+
+      - name: 🌀 Determine if docker-related files changed
+        run: |
+          DOCKER_FILES_CHANGED="false"
+          FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" "build_linux_images.yml" )
+
+          for FILE in "${FILES_TO_CHECK[@]}"; do
+            if echo "$CHANGESET" | grep -q "$FILE"; then
+              echo "File $FILE (which is related to yocto docker image) has changed in this commit."
+              DOCKER_FILES_CHANGED=true
+              break
+            fi
+          done
+
+          echo "DOCKER_FILES_CHANGED=${DOCKER_FILES_CHANGED}" >> $GITHUB_ENV
+
+      - name: 🌀 Determine if docker build is needed
+        run: |
+          DOCKER_BUILD_NEEDED="false"
+          if [[ ${{ env.DOCKER_FILES_CHANGED }} == "false" && ${{ env.PREVIOUS_SHA_IMAGE_EXISTS }} == "true" ]]; then
+            echo "Docker image files were not modified and an image from the previous commit exists. Skipping docker build."
+          else
+            echo "Docker image files were modified or an image from previous commit doesn't exists. Cannot skip docker build."
+            DOCKER_BUILD_NEEDED="true"
+          fi
+          echo "DOCKER_BUILD_NEEDED=${DOCKER_BUILD_NEEDED}" >> $GITHUB_ENV
+
+      - name: 🐳  Set up Docker Buildx
+        if: ${{ env.DOCKER_BUILD_NEEDED == 'true' }}
         uses: docker/setup-buildx-action@v3
 
-      - name: 🔨 Build and push Docker image
-        if: env.DOCKER_BUILD_NEEDED == 'true'
+      - name: 🐳 🔨 Build and push Docker image
+        if: ${{ env.DOCKER_BUILD_NEEDED == 'true' }}
         id: push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ steps.determine_if_build_is_needed.outputs.image }}
+          tags: ${{ env.CURRENT_SHA_IMAGE }}
           file: ${{ github.workspace }}/docker/Dockerfile.yocto
           # Use GitHub runner runners UID and GID, see: https://github.com/actions/jekyll-build-pages/issues/18
           build-args: |
@@ -89,14 +113,21 @@ jobs:
             USER_UID=1001
 
       - name: ⬆️ Pushing latest docker image with current SHA
-        if: env.DOCKER_BUILD_NEEDED == 'false'
+        if: ${{ env.DOCKER_BUILD_NEEDED == 'false' }}
         run: |
-          PREVIOUS_IMAGE="ghcr.io/${{ github.event.repository }}:${PREVIOUS_SHA}"
-          echo "Pulling previous image ${PREVIOUS_IMAGE}..."
-          docker pull ${PREVIOUS_IMAGE}
+          echo "Pulling previous image ${{ env.PREVIOUS_SHA_IMAGE }}..."
+          docker pull ${{ env.PREVIOUS_SHA_IMAGE }}
 
-          echo "Tagging previous image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
-          docker tag ${{ steps.determine_if_build_is_needed.outputs.image }}
+          echo "Tagging previous image with current SHA..."
+          docker tag ${{ env.PREVIOUS_SHA_IMAGE }} ${{ env.CURRENT_SHA_IMAGE }}
 
-          echo "Pushing image with current SHA ${{ steps.determine_if_build_is_needed.outputs.image }}..."
-          docker push ${{ steps.determine_if_build_is_needed.outputs.image }}
+          echo "Pushing image with current SHA..."
+          docker push ${{ env.CURRENT_SHA_IMAGE }}
+
+      - name: 🌀 Tagging image as latest
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+            echo "This commit is being pushed to the default branch. Tagging image as latest."
+            docker push ${{ steps.determine_if_build_is_needed.outputs.image }}:latest
+
+
