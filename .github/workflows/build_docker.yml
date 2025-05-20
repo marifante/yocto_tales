@@ -127,6 +127,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
             echo "This commit is being pushed to the default branch. Tagging image as latest."
-            docker push ${{ steps.determine_if_build_is_needed.outputs.image }}:latest
+            docker tag ${{ env.CURRENT_SHA_IMAGE }} ${{ env.IMAGE }}:latest
 
-
+            docker push ${{ env.IMAGE }}:latest
