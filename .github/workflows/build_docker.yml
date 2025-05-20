@@ -86,7 +86,7 @@ jobs:
       - name: ⬆️ Pushing latest docker image with current SHA
         if: env.DOCKER_BUILD_NEEDED == 'false'
         run: |
-          PREVIOUS_IMAGE="ghcr.io/${{ github.event.repository }}:${PREVIOUS_SHA}"
+          PREVIOUS_IMAGE="ghcr.io/${{ github.repository }}:${PREVIOUS_SHA}"
           echo "Pulling previous image ${PREVIOUS_IMAGE}..."
           docker pull ${PREVIOUS_IMAGE}
 
