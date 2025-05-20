@@ -1,6 +1,5 @@
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
+  push:
 
 # In GitHub Actions pull requests events, the current commit SHA (git rev-parse HEAD) is not
 # the same as the commit SHA that triggered the workflow. The current sha obtained from
