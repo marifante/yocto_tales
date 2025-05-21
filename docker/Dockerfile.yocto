@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 AS yoctales_base
+FROM ubuntu:22.04 AS yoctales_base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -7,7 +7,7 @@ RUN \
         apt-get update && \
         apt-get install -yq sudo build-essential git nano vim\
           python3-yaml python3-pip libncursesw5 libncursesw5:i386 \
-          python python3 man bash diffstat gawk chrpath wget cpio \
+          python3 man bash diffstat gawk chrpath wget cpio \
           texinfo lzop apt-utils bc screen libncurses5-dev locales \
           libc6-dev-i386 doxygen libssl-dev dos2unix xvfb x11-utils \
           g++-multilib libssl-dev:i386 zlib1g-dev:i386 \
