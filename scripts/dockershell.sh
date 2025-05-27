@@ -14,7 +14,7 @@ REBUILD_IMAGE=false
 ## Fixed variables
 SCRIPT_PATH=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
-RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot --device=/dev/kvm --device=/dev/net/tun ${DOCKER_IMAGE_EXECUTED_LOCALLY}"
+RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot --privileged ${DOCKER_IMAGE_EXECUTED_LOCALLY}"
 
 while getopts "ro" opt; do
     case ${opt} in

@@ -12,7 +12,7 @@ RUN \
           libc6-dev-i386 doxygen libssl-dev dos2unix xvfb x11-utils \
           g++-multilib libssl-dev:i386 zlib1g-dev:i386 \
           libtool libtool-bin procps python3-distutils pigz socat \
-          zstd iproute2 lz4 iputils-ping \
+          zstd iproute2 lz4 iputils-ping parted bmap-tools \
           curl libtinfo5 net-tools xterm rsync u-boot-tools unzip zip && \
         rm -rf /var/lib/apt-lists/* && \
         echo "dash dash/sh boolean false" | debconf-set-selections && \
@@ -82,12 +82,3 @@ RUN git clone https://github.com/siemens/kas.git /home/embeddev/kas && \
     cd /home/embeddev/kas && \
     git checkout 4.7 && \
     pip install .
-
-# In third stage clone poky layer to setup yocto build environment
-FROM yoctales_kas AS yoctales_poky
-
-ARG POKY_VERSION=walnascar
-
-RUN git clone git://git.yoctoproject.org/poky -b ${POKY_VERSION} /home/embeddev/poky
-
-RUN echo "source /home/embeddev/poky/oe-init-build-env" >> /home/embeddev/.bashrc
