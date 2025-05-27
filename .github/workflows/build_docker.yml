@@ -35,7 +35,7 @@ jobs:
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
           echo "PREVIOUS_SHA=${PREVIOUS_SHA}" >> $GITHUB_ENV
 
-          CHANGESET=$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})
+          CHANGESET="$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})"
           echo "Files that changed in this commit: ${CHANGESET}"
           echo "CHANGESET=${CHANGESET}" >> $GITHUB_ENV
 
@@ -43,7 +43,7 @@ jobs:
           CURRENT_SHA_IMAGE="${IMAGE}:${{ env.CURRENT_SHA }}"
           PREVIOUS_SHA_IMAGE="${IMAGE}:${PREVIOUS_SHA}"
 
-          echo "Image related to this PR = ${CURRENT_SHA_IMAGE}"
+          echo "Image related to this commit = ${CURRENT_SHA_IMAGE}"
           echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
           echo "CURRENT_SHA_IMAGE=${CURRENT_SHA_IMAGE}" >> "$GITHUB_ENV"
           echo "PREVIOUS_SHA_IMAGE=${PREVIOUS_SHA_IMAGE}" >> "$GITHUB_ENV"
