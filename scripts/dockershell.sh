@@ -5,6 +5,38 @@ log() {
     echo "$(date +"%Y-%m-%dT%H:%M:%S.%03N") - $*"
 }
 
+parse_args() {
+    if [ "$#" -eq 0 ]; then
+        help
+        exit 1
+    fi
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -h | --help)
+            shift
+            help
+            exit 0
+            ;;
+        -d | --device)
+            shift
+            DEVICE="--device=${1}"
+            log "Using device: ${DEVICE}"
+            shift
+            ;;
+        -r | --rebuild)
+            shift
+            REBUILD_IMAGE=true
+            ;;
+        *)
+            echo "Invalid option: $1" >&2
+            help
+            exit 1
+            ;;
+        esac
+    done
+}
+
 ###############################################################################
 ## Parameters
 DOCKER_IMAGE_EXECUTED_LOCALLY='yocto_tales:local'
@@ -14,23 +46,9 @@ REBUILD_IMAGE=false
 ## Fixed variables
 SCRIPT_PATH=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
-RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot --privileged ${DOCKER_IMAGE_EXECUTED_LOCALLY}"
+RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot"
 
-while getopts "ro" opt; do
-    case ${opt} in
-    r)
-        REBUILD_IMAGE=true
-        ;;
-    \?)
-        echo "Invalid option: -$OPTARG"
-        exit 1
-        ;;
-    :)
-        echo "The option -$OPTARG requires an argument."
-        exit 1
-        ;;
-    esac
-done
+parse_args "$@"
 
 log "SCRIPT_DIR = ${SCRIPT_DIR}"
 
@@ -47,8 +65,8 @@ if [[ "$(docker images -q ${DOCKER_IMAGE_EXECUTED_LOCALLY} 2>/dev/null)" == "" ]
     docker build -f ${SCRIPT_DIR}/../docker/${DOCKERFILE} \
         --build-arg USER_UID=${uid} --build-arg USER_GID=${gid} \
         -t ${DOCKER_IMAGE_EXECUTED_LOCALLY} . &&
-        ${RUN_CMD}
+        ${RUN_CMD} "${DEVICE}" ${DOCKER_IMAGE_EXECUTED_LOCALLY}
 else
     log "yeah! ${DOCKER_IMAGE_EXECUTED_LOCALLY} exists!!"
-    ${RUN_CMD}
+    ${RUN_CMD} "${DEVICE}" ${DOCKER_IMAGE_EXECUTED_LOCALLY}
 fi
