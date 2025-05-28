@@ -46,7 +46,7 @@ REBUILD_IMAGE=false
 ## Fixed variables
 SCRIPT_PATH=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
-RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot"
+RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/home/embeddev/tftpboot --cap-add=NET_ADMIN"
 
 parse_args "$@"
 
