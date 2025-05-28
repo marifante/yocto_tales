@@ -14,5 +14,6 @@ Docker images are being built in CI using GitHub Actions. After ever PR is merge
 
 If you are running QEMU in a docker container, you need to make sure that:
 
-- you are mounting device `/dev/net/tun` in the container through docker run command (`--device=/dev/net/tun`). You can do this using `-d` flag in the `scripts/dockershell.sh` script.
+- you are mounting device `/dev/net/tun` in the container through docker run command (`--device=/dev/net/tun`).
 - you are giving NET_ADMIN capability to the container using `--cap-add=NET_ADMIN` option in the docker run command. This is already being done in the `scripts/dockershell.sh` script.
+- it is easier if you pass the flag `nographic` to QEMU, so you can see the output in your dockershell. By default `runqemu` script inside OE build environment will try to open a graphical window. For example, you could use: `runqemu qemuarm nographic`.
