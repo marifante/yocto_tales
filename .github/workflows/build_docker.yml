@@ -35,8 +35,9 @@ jobs:
           echo "Current SHA: ${{ env.CURRENT_SHA }}, previous SHA: ${PREVIOUS_SHA}"
           echo "PREVIOUS_SHA=${PREVIOUS_SHA}" >> $GITHUB_ENV
 
-          CHANGESET="$(git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }})"
-          echo "Files that changed in this commit: ${CHANGESET}"
+          CHANGESET="$(mktemp)"
+          git diff --name-only ${PREVIOUS_SHA} ${{ env.CURRENT_SHA }} >> ${CHANGESET}
+          echo "Files that changed in this commit: $(cat ${CHANGESET})"
           echo "CHANGESET=${CHANGESET}" >> $GITHUB_ENV
 
           IMAGE="ghcr.io/${{ github.repository }}"
@@ -73,7 +74,7 @@ jobs:
           FILES_TO_CHECK=( "src/yoctales" "requirements.txt" "setup.py" "Dockerfile.yocto" "build_linux_images.yml" )
 
           for FILE in "${FILES_TO_CHECK[@]}"; do
-            if echo "$CHANGESET" | grep -q "$FILE"; then
+            if echo "$(cat ${{ env.CHANGESET }})" | grep -q "$FILE"; then
               echo "File $FILE (which is related to yocto docker image) has changed in this commit."
               DOCKER_FILES_CHANGED=true
               break

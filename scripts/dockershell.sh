@@ -50,6 +50,7 @@ RUN_CMD="docker run --rm -it -v $(pwd):/home/embeddev/yocto_tales -v /tftpboot:/
 
 parse_args "$@"
 
+log "Welcome to Yocto Tales Docker Shell script!"
 log "SCRIPT_DIR = ${SCRIPT_DIR}"
 
 if [ "${REBUILD_IMAGE}" = "true" ]; then
