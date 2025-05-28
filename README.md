@@ -17,3 +17,18 @@ If you are running QEMU in a docker container, you need to make sure that:
 - you are mounting device `/dev/net/tun` in the container through docker run command (`--device=/dev/net/tun`).
 - you are giving NET_ADMIN capability to the container using `--cap-add=NET_ADMIN` option in the docker run command. This is already being done in the `scripts/dockershell.sh` script.
 - it is easier if you pass the flag `nographic` to QEMU, so you can see the output in your dockershell. By default `runqemu` script inside OE build environment will try to open a graphical window. For example, you could use: `runqemu qemuarm nographic`.
+
+### Creating tap devices
+
+When we are running QEMU in a docker container, it will require to create a tap device. Note that this will not work if you don't run the container with `--cap-add=NET_ADMIN` and `--device=/dev/net/tun`.
+In order to do that, we need to login as root in the container and create it:
+
+```bash
+# inside the docker container
+
+sudo su
+source oe-init-build-env
+runqemu-gen-tapdevs 1000 1
+
+# now you can exit root and run qemu
+```
